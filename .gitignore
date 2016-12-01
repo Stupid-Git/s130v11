@@ -1,26 +1,51 @@
-# tudsV11
+# ble_peripheral/tudsV11
 ble_peripheral/tudsV11/config
 ble_peripheral/tudsV11/hex
 ble_peripheral/tudsV11/pca10028/s130
 ble_peripheral/tudsV11/pca10028/s130_with_dfu/arm5_no_packs/_build
 
 
-# hrs ref
-ble_peripheral/ble_app_hrs
-
+# ble_peripheral/ud2V11
 ble_peripheral/ud2V11
 
 
-dfu/
+# dfu/bootloader
+dfu/bootloader/pca10036/
+dfu/bootloader/pca10040/
+dfu/bootloader/pca10028/dual_bank_serial_s130/
+dfu/bootloader/pca10028/single_bank_serial_s130/
 
+dfu/bootloader/*.eww
+dfu/bootloader/*.ld
+dfu/bootloader/config
+dfu/bootloader/hex
+
+dfu/bootloader/pca10028/dual_bank_ble_s130/arm4
+dfu/bootloader/pca10028/dual_bank_ble_s130/iar
+dfu/bootloader/pca10028/dual_bank_ble_s130/armgcc
+
+dfu/bootloader/pca10028/dual_bank_ble_s130/arm5_no_packs/_build
+dfu/bootloader/pca10028/dual_bank_ble_s130/arm5_no_packs/dfu_*
+dfu/bootloader/pca10028/dual_bank_ble_s130/arm5_no_packs/*.karel
+
+
+
+
+# nrfutil
 nrfutil/*.zip
 nrfutil/*.hex
 
+# ble_peripheral/ble_app_hrs - Reference
+ble_peripheral/ble_app_hrs
+
+# OTHER
 *.txt
 *.bak
 *.TMP
 *.tmp
 
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 # Compiled Object files
 *.slo
