@@ -1,5 +1,15 @@
+# tudsV11
+ble_peripheral/tudsV11/config
+ble_peripheral/tudsV11/hex
+ble_peripheral/tudsV11/pca10028/s130
+ble_peripheral/tudsV11/pca10028/s130_with_dfu/arm5_no_packs/_build
+
+
 # hrs ref
-ble_peripheral/
+ble_peripheral/ble_app_hrs
+
+ble_peripheral/ud2V11
+
 
 dfu/
 
@@ -8,7 +18,8 @@ nrfutil/*.hex
 
 *.txt
 *.bak
-
+*.TMP
+*.tmp
 
 
 # Compiled Object files

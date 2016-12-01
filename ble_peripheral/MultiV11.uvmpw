@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ProjectWorkspace xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_mpw.xsd">
+
+  <SchemaVersion>1.0</SchemaVersion>
+
+  <Header>### uVision Project, (C) Keil Software</Header>
+
+  <WorkspaceName>WorkSpace</WorkspaceName>
+
+  <project>
+    <PathAndName>.\ble_app_hrs\pca10028\s130_with_dfu\arm5_no_packs\ble_app_hrs_s130_with_dfu_pca10028.uvprojx</PathAndName>
+    <NodeIsExpanded>1</NodeIsExpanded>
+  </project>
+
+  <project>
+    <PathAndName>.\tudsV11\pca10028\s130_with_dfu\arm5_no_packs\tudsv11_s130_with_dfu_pca10028.uvprojx</PathAndName>
+    <NodeIsExpanded>1</NodeIsExpanded>
+  </project>
+
+  <project>
+    <PathAndName>..\dfu\bootloader\pca10028\dual_bank_ble_s130\arm5_no_packs\dfuv11_dual_bank_ble_s130_pca10028.uvprojx</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
+    <NodeIsExpanded>1</NodeIsExpanded>
+  </project>
+
+  <project>
+    <PathAndName>.\ud2V11\pca10028\s130_with_dfu\arm5_no_packs\ud2v11_s130_with_dfu_pca10028.uvprojx</PathAndName>
+  </project>
+
+</ProjectWorkspace>
