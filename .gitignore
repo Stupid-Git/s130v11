@@ -1,3 +1,16 @@
+# hrs ref
+ble_peripheral/
+
+dfu/
+
+nrfutil/*.zip
+nrfutil/*.hex
+
+*.txt
+*.bak
+
+
+
 # Compiled Object files
 *.slo
 *.lo
