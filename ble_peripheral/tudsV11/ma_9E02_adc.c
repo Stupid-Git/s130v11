@@ -395,6 +395,7 @@ int NADC_proc( eNADC_action action)
 
                 g_PRE = false; // OLD - get out of PRE mode
                              
+                NANNY_normalBoot_schedule_9E_ON_cmd();                                        
             }
         }
 
