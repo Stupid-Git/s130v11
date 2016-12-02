@@ -68,77 +68,25 @@ void ADC_IRQHandler(void)
 
     adc_sample = nrf_adc_result_get();
 
+#if USE_NADC
+    NADC_proc(NADC_action_ADC_DONE);
+#else
     adc_proc(ADC_PROC_ADC_TRIGGER);    
     adc_proc_PRE(ADC_PROC_ADC_TRIGGER);    
+#endif
 }
 
-/**/
-typedef enum 
-{
-    ADC_COUNTING,
-    ADC_PARKED,   
-    ADC_LOADSEQUENCE,
-} adc_state_t;
-static adc_state_t adc_sm = ADC_PARKED;
 
-typedef enum 
-{
-    ADCADC_ON,
-    ADCADC_S0,
-    ADCADC_S1,
-    ADCADC_S2,
-    ADCADC_S3,
-} adcADC_state_t;
-static adcADC_state_t adcADC_sm = ADCADC_S0;
-/**/
-
-
-//PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE 
-//PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE 
-bool g_PRE = true;
-typedef enum 
-{
-    ADCPRE_WAIT_ONE,
-    ADCPRE_START_ONE,
-    ADCPRE_TIMEUP_ONE,  //ADC_PROC_TIMER_TICK_TWO
-    ADCPRE_ADCDONE_ONE, //ADC_PROC_ADC_TRIGGER
-                
-    ADCPRE_PARKED,   
-
-} adc_state_PRE_t;
-
-static adc_state_PRE_t adcPRE_sm = ADCPRE_PARKED;
-
-//PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE 
-//PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE 
-
-
-
-
-
-//    6-> 505uS
-// 351 -> aaa
-//#define TIMERTogA        6
-//#define TIMERTogB      317
-//uint32_t timerTog = TIMERTogA;
-
-#define TIMERTog_6       6
-#define TIMERTog_317   317
-
-
-//mg_9_ADC_rate = be_Rsp->buffer[9];
-//mg_10_loadADC = be_Rsp->buffer[10];
-static uint8_t cnt_9 = 0;
-static uint8_t cnt_10s = 0;
-static uint8_t cnt_10m = 0;
-static float dv_old = 3.0;
+#if USE_NADC
+#else
+//static float dv_old = 3.0;
 static float dv_new = 3.0;
 static uint16_t batStatus78;
+#endif
 static uint16_t batVoltage78;
+bool g_PRE = true;
 
 
-bool   m_ADC_notEnabled = true;
-    
 static float voltsFromAdcValue(int v)
 {
     float dv = 0.0;
@@ -149,7 +97,13 @@ static float voltsFromAdcValue(int v)
     return(dv);
 }
 
-static int load_cnt;
+
+//mg_9_ADC_rate = be_Rsp->buffer[9];
+//mg_10_loadADC = be_Rsp->buffer[10];
+static uint8_t cnt_9 = 0;
+static uint8_t cnt_10s = 0;
+static uint8_t cnt_10m = 0;
+
 
 int adc_count()
 {
@@ -180,6 +134,357 @@ int adc_count()
     return(adcMeasureType);
 }
 
+//    6-> 505uS
+// 351 -> aaa
+//#define TIMERTogA        6
+//#define TIMERTogB      317
+//uint32_t timerTog = TIMERTogA;
+
+#define TIMERTog_6       6
+#define TIMERTog_317   317
+
+
+#if USE_NADC
+#else
+#endif
+
+#if USE_NADC
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+typedef enum _eNADC_state
+{
+    NADC_state_IDLE,        // 0
+    NADC_state_START,       // 1
+    NADC_state_WIDTH_WAIT,  // 2
+    NADC_state_WAIT_ADC,    // 3
+    NADC_state_DONE_ADC,    // 4
+    NADC_state_QUEUE_9E02,  // 5
+} eNADC_state;
+
+typedef struct ADC_entity_s
+{
+    eNADC_state  state;
+    uint16_t     u16_value;
+} ADC_entity_t;
+
+ADC_entity_t m_ADC_ENT_L;
+ADC_entity_t m_ADC_ENT_H;
+
+eNADC_mode NADC_mode;
+
+/* not used*/
+void NADC_set_ADC_L_GO(void)
+{
+    if( m_ADC_ENT_L.state == NADC_state_IDLE)
+    {
+        m_ADC_ENT_L.state = NADC_state_START;
+    }
+}
+void NADC_set_ADC_H_GO(void)
+{
+    if( m_ADC_ENT_H.state == NADC_state_IDLE)
+    {
+        m_ADC_ENT_H.state = NADC_state_START;
+    }
+}
+/*not used */
+
+int NADC_proc( eNADC_action action)
+{
+    
+    dbgPrintf("\r\n               NADC_proc %d", action);
+    dbgPrintf(",  L.state = %d", m_ADC_ENT_L.state);
+    dbgPrintf(",  H.state = %d", m_ADC_ENT_H.state);
+    dbgPrintf(",  NADC_mode = %d", NADC_mode);
+    
+    
+    int adcMeasureType = 0;
+    if(action == NADC_action_NONE)
+    {
+    }
+    
+    if(action == NADC_action_ONE_SECOND)
+    {
+        if( (NADC_mode == NADC_mode_FORCE_2) || (NADC_mode == NADC_mode_FORCE_1) )
+        {
+            return(0); // FORCE does not use timer
+        }
+        
+        // After voltage > BOOT_V_LIMIT(2.5) is detected, we remain in NADC_mode_VCHECK mode
+        // with mg_9_ADC_rate = 0; so no new ADC's will be done.
+        
+        // After the 9E_01 read of mg_9_ADC_rate 
+        // if mg_9_ADC_rate == 0
+        //    go straight to NADC_mode_NORMAL 
+        // else
+        //    go to NADC_mode_FORCE_1
+        if(NADC_mode == NADC_mode_VCHECK)
+        {
+        }
+        if(NADC_mode == NADC_mode_NORMAL)
+        {
+        }
+
+        adcMeasureType = adc_count();
+        if (adcMeasureType == 1)
+        {
+            if(m_ADC_ENT_L.state < NADC_state_START)  // == NADC_state_IDLE
+                m_ADC_ENT_L.state = NADC_state_START;
+            action = NADC_action_CHECK; // get rolling
+            
+            cnt_9 = 0; // this and parking needs to be sorted out
+        }
+        if (adcMeasureType == 2)
+        {
+            if(m_ADC_ENT_H.state < NADC_state_START)
+                m_ADC_ENT_H.state = NADC_state_START;
+            action = NADC_action_CHECK; // get rolling
+            
+            cnt_9 = 0; // this and parking needs to be sorted out
+            cnt_10s = 0; // this and parking needs to be sorted out
+            cnt_10m = 0; // this and parking needs to be sorted out
+        }
+
+        //if (adcMeasureType != 0) // != 0 means doing an ADC
+        //{
+        //    adc_sm = ADC_PARKED;
+        //}                
+        if (adcMeasureType != 0)
+        {
+        }
+    }
+    
+    
+    if(action == NADC_action_9E_TIMEOUT)
+    {
+        action = NADC_action_9E_DONE; // fall through to DONE for the moment
+        /*
+        if(m_ADC_ENT_L.state == NADC_state_QUEUE_9E02)
+        {
+            //TODO : try and resend?  Other timeouts? .....
+        }
+        if(m_ADC_ENT_H.state == NADC_state_QUEUE_9E02)
+        {
+            //TODO : try and resend?  Other timeouts? .....
+        }
+        */
+    }
+    if(action == NADC_action_9E_DONE)
+    {
+        if(m_ADC_ENT_L.state == NADC_state_QUEUE_9E02)
+        {
+            m_ADC_ENT_L.state = NADC_state_IDLE;
+        }
+        
+        if(m_ADC_ENT_H.state == NADC_state_QUEUE_9E02)
+        {
+            m_ADC_ENT_H.state = NADC_state_IDLE;
+        }
+
+        if(NADC_mode == NADC_mode_FORCE_1)
+        {
+            NADC_set_ADC_H_GO();
+            NADC_mode = NADC_mode_FORCE_2;
+            action = NADC_action_CHECK;
+        }
+        else
+        if(NADC_mode == NADC_mode_FORCE_2)
+        {
+            NADC_mode = NADC_mode_NORMAL;
+            cnt_9 = 0; // this and parking needs to be sorted out
+            cnt_10s = 0; // this and parking needs to be sorted out
+            cnt_10m = 0; // this and parking needs to be sorted out
+        }
+    }
+    
+    if(action == NADC_action_CHECK)
+    {
+        if( m_ADC_ENT_L.state > NADC_state_START)
+            return(0);
+        if( m_ADC_ENT_H.state > NADC_state_START)
+            return(0);
+
+        if( m_ADC_ENT_L.state == NADC_state_START)
+        {
+            BattPins_ON_LO();                    //DRIVE_BAT_LOW()
+            adcOn_timer_start( TIMERTog_6 );     //START_TIMER(L);
+            m_ADC_ENT_L.state = NADC_state_WIDTH_WAIT;
+            return(0);
+        }
+        else
+        if( m_ADC_ENT_H.state == NADC_state_START)
+        {
+            BattPins_ON_LO();                    //DRIVE_BAT_HIGH()
+            BattPins_ON_HI();                    //DRIVE_BAT_HIGH()
+            adcOn_timer_start( TIMERTog_317 );   //START_TIMER(HIGH);
+            m_ADC_ENT_H.state = NADC_state_WIDTH_WAIT;
+            return(0);
+        }
+        return(0);
+    }
+    
+    
+    if(action == NADC_action_WIDTH_TIMER)
+    {
+        if( m_ADC_ENT_L.state == NADC_state_WIDTH_WAIT)
+        {
+            nrf_adc_start(); //START_ADC_CONVERSION()
+            m_ADC_ENT_L.state = NADC_state_WAIT_ADC;
+            return(0);
+        }
+        else
+        if( m_ADC_ENT_H.state == NADC_state_WIDTH_WAIT)
+        {
+            nrf_adc_start(); //START_ADC_CONVERSION()
+            m_ADC_ENT_H.state = NADC_state_WAIT_ADC;
+            return(0);
+        }
+        return(0);
+    }
+
+    if(action == NADC_action_ADC_DONE)
+    {
+        BattPins_OFF(); //RELEASE_DRIVE_BAT()
+
+        float    _dv_new = voltsFromAdcValue(adc_sample);
+        uint16_t _u16_bat = (uint16_t)(_dv_new * 1000.0);
+
+        if( m_ADC_ENT_L.state == NADC_state_WAIT_ADC)
+        {
+            m_ADC_ENT_L.u16_value = _u16_bat;
+            m_ADC_ENT_L.state = NADC_state_DONE_ADC;
+            if(NADC_mode == NADC_mode_VCHECK)
+                m_ADC_ENT_L.state = NADC_state_IDLE;
+        }
+        else
+        if( m_ADC_ENT_H.state == NADC_state_WAIT_ADC)
+        {
+            m_ADC_ENT_H.u16_value = _u16_bat | 0x8000; // | 0x8000 to indicated loaded value
+            m_ADC_ENT_H.state = NADC_state_DONE_ADC;
+            if(NADC_mode == NADC_mode_VCHECK)
+                m_ADC_ENT_H.state = NADC_state_IDLE;
+        }
+
+        //NADC_mode = NADC_mode_VCHECK;
+        //NADC_mode_VCHECK,   // do ADC but don't send via 9E_02
+        //NADC_mode_FORCE_1,  // after reading 9E_01 and timer non zero: Force first ADC->9E_02
+        //NADC_mode_FORCE_2,  // after reading 9E_01 and timer non zero: Force first ADC->9E_02
+        //NADC_mode_NORMAL,   // after FORCE_1, FORCE_2 just our normal mode
+
+        if(NADC_mode == NADC_mode_VCHECK)
+        {
+            if (_dv_new > BOOT_V_LIMIT) //2.50)
+            {
+                mg_9_ADC_rate = 0; // Zero - disable until mg_9_ADC_rate is set again
+                mg_10_loadADC = 0; // Not Used
+                cnt_9 = 0;
+                cnt_10s = 0;
+                cnt_10m = 0;
+
+                g_PRE = false; // OLD - get out of PRE mode
+            }
+        }
+
+        if(NADC_mode == NADC_mode_NORMAL)
+        {
+            uniEvent_t LEvt;
+            LEvt.evtType = evt_core_ADC_trigger;
+            core_thread_QueueSend(&LEvt);
+        }
+        
+        if(NADC_mode == NADC_mode_FORCE_1)
+        {
+            uniEvent_t LEvt;
+            LEvt.evtType = evt_core_ADC_trigger;
+            core_thread_QueueSend(&LEvt);
+        }
+        
+        if(NADC_mode == NADC_mode_FORCE_2)
+        {
+            uniEvent_t LEvt;
+            LEvt.evtType = evt_core_ADC_trigger;
+            core_thread_QueueSend(&LEvt);
+        }
+        
+        
+            
+        return(0);
+    }
+
+
+
+    if(action == NADC_action_RESET)
+    {
+        m_ADC_ENT_L.state = NADC_state_IDLE;
+        m_ADC_ENT_H.state = NADC_state_IDLE;
+        BattPins_OFF(); //RELEASE_DRIVE_BAT();
+        
+        // Set Voltage check rate
+        NADC_mode = NADC_mode_VCHECK;        
+        mg_9_ADC_rate = 1; // Once a second
+        mg_10_loadADC = 0; // Not Used
+        cnt_9 = 0;
+        cnt_10s = 0;
+        cnt_10m = 0;
+        
+        //mg_9_ADC_rate = be_Rsp->buffer[9];
+        //mg_10_loadADC = be_Rsp->buffer[10];
+        //static uint8_t cnt_9 = 0;
+        //static uint8_t cnt_10s = 0;
+        //static uint8_t cnt_10m = 0;
+    }
+    return(0);
+}
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#else //USE_NADC
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+
+/**/
+typedef enum 
+{
+    ADC_COUNTING,
+    ADC_PARKED,   
+    ADC_LOADSEQUENCE,
+} adc_state_t;
+static adc_state_t adc_sm = ADC_PARKED;
+
+typedef enum 
+{
+    ADCADC_ON,
+    ADCADC_S0,
+    ADCADC_S1,
+    ADCADC_S2,
+    ADCADC_S3,
+} adcADC_state_t;
+static adcADC_state_t adcADC_sm = ADCADC_S0;
+/**/
+
+
+//PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE 
+//PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE 
+typedef enum 
+{
+    ADCPRE_WAIT_ONE,
+    ADCPRE_START_ONE,
+    ADCPRE_TIMEUP_ONE,  //ADC_PROC_TIMER_TICK_TWO
+    ADCPRE_ADCDONE_ONE, //ADC_PROC_ADC_TRIGGER
+                
+    ADCPRE_PARKED,   
+
+} adc_state_PRE_t;
+
+static adc_state_PRE_t adcPRE_sm = ADCPRE_PARKED;
+
+//PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE 
+//PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE PRE 
+
+
+
+
+static int load_cnt;
+
 int   vPreCount = 0;
 float vPre_0;
 float vPre_1;
@@ -199,7 +504,7 @@ int adc_proc_PRE(int param)
         vPre_0 = 0.0;
         vPre_1 = 0.0;
         vPre_2 = 0.0;
-        vPre_Limit = 2.5;
+        vPre_Limit = BOOT_V_LIMIT; //2.5;
         vPre_Sunaba = 1.8; // 1.16 [169]
 
         //mg_9_ADC_rate = 0;
@@ -246,7 +551,7 @@ int adc_proc_PRE(int param)
                 {
                 }            
 
-                if (dv_new > 2.50)
+                if (dv_new > BOOT_V_LIMIT)//2.50)
                 {
                     g_PRE = false;
 
@@ -357,7 +662,7 @@ int adc_proc(int param)
         
         adc_sm = ADC_COUNTING;
         load_cnt = 0;
-        dv_old = 3.0;
+        //dv_old = 3.0;
         dv_new = 3.0;
     }
     
@@ -387,7 +692,7 @@ int adc_proc(int param)
                     BattPins_ON_LO();
                     batStatus78 = 0x0000;
 
-                    dv_old = dv_new;
+                    //dv_old = dv_new;
 #if USE_ADCON_TIMER
                     /* For testing
                     if( timerTog == TIMERTogA)
@@ -421,7 +726,7 @@ int adc_proc(int param)
                     BattPins_ON_HI();
                     batStatus78 = 0x8000;
                     
-                    dv_old = dv_new;
+                    //dv_old = dv_new;
 #if USE_ADCON_TIMER
                     adcADC_sm = ADCADC_ON;
                     adcOn_timer_start( TIMERTog_317 );
@@ -528,23 +833,53 @@ int adc_proc(int param)
     }
     return(0);
 }
+#endif //USE_NADC
+
 
 
 int proc_timeout_ADC( be_t *be_Req,  be_t *be_Rsp )
 {
     dbgPrint("\r\nproc_timeout_ADC_02");
+
+#if USE_NADC
+    NADC_proc(NADC_action_9E_TIMEOUT);
+#else
     adc_proc(ADC_PROC_UNPARK);
+#endif
     return(0);
 }
+
 
 int proc_rsp_ADC( be_t *be_Req,  be_t *be_Rsp )
 {
     dbgPrint("\r\nproc_rsp_ADC_02");
+#if USE_NADC
+    NADC_proc(NADC_action_9E_DONE);
+#else
     adc_proc(ADC_PROC_UNPARK);
+#endif
     return(0);
 }
+
+
+
 int make_req_ADC( be_t *be_Req )
 {
+#if USE_NADC
+    if( m_ADC_ENT_L.state == NADC_state_DONE_ADC)
+    {
+        batVoltage78 = m_ADC_ENT_L.u16_value;
+        m_ADC_ENT_L.state = NADC_state_QUEUE_9E02;
+    }
+    else
+    if( m_ADC_ENT_H.state == NADC_state_DONE_ADC)
+    {
+        batVoltage78 = m_ADC_ENT_H.u16_value;
+        m_ADC_ENT_H.state = NADC_state_QUEUE_9E02;
+    }    
+#else
+#endif
+    
     be_Req->buffer[0] = 0x01;
     be_Req->buffer[1] = 0x9E;
     be_Req->buffer[2] = 0x02;
@@ -552,8 +887,13 @@ int make_req_ADC( be_t *be_Req )
     be_Req->buffer[4] = 0; //len MSB
     be_Req->buffer[5] = FIRMWARE_REV_LSB; //0x91;
     be_Req->buffer[6] = FIRMWARE_REV_MSB; //0x00; // 0x0100 -> Version 1.00
+#if USE_NADC
     be_Req->buffer[7] = (batVoltage78 >> 0) & 0x00ff;
     be_Req->buffer[8] = (batVoltage78 >> 8) & 0x00ff;
+#else
+    be_Req->buffer[7] = (batVoltage78 >> 0) & 0x00ff;
+    be_Req->buffer[8] = (batVoltage78 >> 8) & 0x00ff;
+#endif
     
     uint16_t cs;
 #if _USE_CRC

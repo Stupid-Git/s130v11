@@ -382,7 +382,7 @@ typedef enum eSS
 //-------------------------------------
 typedef struct SSQ_item_s
 {
-    char name[42];
+    //char name[42];
     coreProcBlock_t* p_cpb;
 } SSQ_item_t;
 
@@ -415,7 +415,7 @@ void P7_P8_ticks_from_mg7_mg8(void)
 
 void  SSQ_Item_Init( SSQ_item_t *pI )
 {
-    pI->name[0] = 0;
+    //pI->name[0] = 0;
     pI->p_cpb = 0;
 }
 
@@ -625,6 +625,9 @@ static void SS_thread_process_event(uniEvent_t *pEvt)
     //----- Triggers ----- core_ADC -----
     case evt_core_ADC_trigger: //dbgPrint("\r\nevt_core_ADC_trigger");
 
+#if USE_NADC
+#else
+#endif
         //----- if operation is already pending, then fall out -----
         if( cpb_ADC.pending == true) 
             break; // no next event set?!?!

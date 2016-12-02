@@ -1706,9 +1706,13 @@ int main_tuds(void)
 
 
     m_ADC_notEnabled = true;
-    
+
+#if USE_NADC
+    NADC_proc( NADC_action_RESET);
+#else
     adc_proc_PRE(ADC_PROC_INIT_TRIGGER);
     adc_proc(ADC_PROC_INIT_TRIGGER);
+#endif
     bln_proc(BLN_PROC_INIT_TRIGGER);
     blp_proc(BLP_PROC_INIT_TRIGGER);
     

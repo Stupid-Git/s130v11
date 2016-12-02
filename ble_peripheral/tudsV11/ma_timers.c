@@ -190,7 +190,11 @@ static void GP_timeout_handler(void * p_context) // Effectively a 1 Second timer
 
     if( g_PRE == true )
     {
+#if USE_NADC
+        NADC_proc( NADC_action_ONE_SECOND);
+#else
         adc_proc_PRE(ADC_PROC_TIMER_TICK);
+#endif
         if( g_PRE == false )
         { 
             // _PRE_advertising
@@ -202,9 +206,13 @@ static void GP_timeout_handler(void * p_context) // Effectively a 1 Second timer
     }
     else
     {    
+#if USE_NADC
+        NADC_proc( NADC_action_ONE_SECOND);
+#else
+        adc_proc(ADC_PROC_TIMER_TICK);
+#endif
         blp_proc(BLP_PROC_TIMER_TICK);
         bln_proc(BLN_PROC_TIMER_TICK);
-        adc_proc(ADC_PROC_TIMER_TICK);
     }        
 }
 
@@ -280,7 +288,11 @@ static void adcOn_timeout_handler(void * p_context) // Aim for around 1ms
 
     if( g_PRE == true )
     {
+#if USE_NADC
+        NADC_proc(NADC_action_WIDTH_TIMER);
+#else
         adc_proc_PRE(ADC_PROC_TIMER_TICK_TWO);
+#endif
         if( g_PRE == false )
         { 
             // _PRE_advertising
@@ -292,7 +304,11 @@ static void adcOn_timeout_handler(void * p_context) // Aim for around 1ms
     }
     else
     {    
+#if USE_NADC
+        NADC_proc(NADC_action_WIDTH_TIMER);
+#else
         adc_proc(ADC_PROC_TIMER_TICK_TWO);
+#endif
     }        
 }
 

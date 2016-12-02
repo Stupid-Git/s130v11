@@ -75,7 +75,8 @@ int make_req_BLP( be_t *be_Req )
 }
 
 
-
+bool   m_ADC_notEnabled = true;
+    
 int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
 {
     dbgPrint("\r\nproc_rsp_BLP_01");
@@ -121,8 +122,8 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
     //mg_7_wkUpPerX50ms = be_Rsp->buffer[7];
     //mg_8_wkUpDelayX1ms = be_Rsp->buffer[8];
     
-    mg_9_ADC_rate = 5; // 30 seconds
-    //mg_10_loadADC = 2;  //  2 minutes
+    mg_9_ADC_rate = 35; // 30 seconds
+    mg_10_loadADC = 2;  //  2 minutes
     
     //mg_11_power = ;
     
@@ -131,6 +132,18 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
 
     
 
+    if(NADC_mode == NADC_mode_VCHECK)
+    {
+        //if ( (mg_12_9E00_rate == 0) && (mg_9_ADC_rate == 0))
+        if (mg_9_ADC_rate == 0)
+        {
+            NADC_mode = NADC_mode_NORMAL; // Do NOT send 9E_02
+        }
+        else
+        {
+            NADC_mode = NADC_mode_FORCE_1; // FORCE TWO ADC READINGS BEFORE going to NADC_mode_NORMAL
+        }
+    }
 //-----------------------------------------------------------------------------    
 //-----------------------------------------------------------------------------    
 
@@ -245,6 +258,11 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
 
     m_ADC_notEnabled = false;
 
+    if( NADC_mode == NADC_mode_FORCE_1 )
+    {
+        NADC_set_ADC_L_GO();
+        NADC_proc(NADC_action_CHECK);
+    }
 
     return(0);
 }

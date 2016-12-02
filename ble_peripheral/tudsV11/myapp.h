@@ -42,6 +42,13 @@ extern "C"
 
 
 //---------------------------------------------------------
+// Use NEW ADC scheme
+#define USE_NADC   1
+#if USE_NADC
+#endif
+#define BOOT_V_LIMIT 2.60 // 2.50
+
+//---------------------------------------------------------
 // Timer to time the ON period for the ADC load
 #define USE_ADCON_TIMER    1
 
