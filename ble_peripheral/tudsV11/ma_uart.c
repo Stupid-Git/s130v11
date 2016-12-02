@@ -22,6 +22,13 @@ typedef enum
 
  eST_URX_t m_urx_state = ST_URX_STAGING;
 
+void be_UCm_IndicateStartRecv(void);
+void be_UB_IndicateStartRecv(void);
+
+void be_UCm_IndicateDoneRecv(void);
+void be_UB_IndicateDoneRecv(void);
+
+
 //-----------------------------------------------------------------------------
 static int32_t be_AddByte(uint8_t c)
 {
@@ -34,28 +41,7 @@ static int32_t be_AddByte(uint8_t c)
     return(r);
 }
 
-
 //-----------------------------------------------------------------------------
-void serialSync_toss_0x01(uint8_t c)
-{
-    //TODO
-    // work out when we get to the end of a packet
-    // if( at the end) m_urx_state = ST_URX_STAGING;
-}
-void serialSync_toss_T2(uint8_t c)
-{
-    //TODO
-    // work out when we get to the end of a packet
-    // if( at the end) m_urx_state = ST_URX_STAGING;
-}
-
-
-void be_UCm_IndicateStartRecv(void);
-void be_UB_IndicateStartRecv(void);
-
-void be_UCm_IndicateDoneRecv(void);
-void be_UB_IndicateDoneRecv(void);
-
 void set_curr_beUrx_toStartPosition(void)
 {
     m_curr_beUrx = &be_Urx;
@@ -67,6 +53,14 @@ void set_curr_beUrx_toStartPosition(void)
 }
 
 //-----------------------------------------------------------------------------
+void serialSync_toss_0x01(uint8_t c)
+{
+    //TODO
+    // work out when we get to the end of a packet
+    // if( at the end) m_urx_state = ST_URX_STAGING;
+}
+
+//-----------------------------------------------------------------------------
 static int32_t serialSync_parseBytes( /*be_t *p_beUrx,*/ uint8_t *p_c, int len)
 {
     volatile be_t *be_tmp;
@@ -75,13 +69,6 @@ static int32_t serialSync_parseBytes( /*be_t *p_beUrx,*/ uint8_t *p_c, int len)
     uint8_t c = *p_c;
     r = 0;
 
-    //=================
-    //=====  BIG  =====
-    //=================
-    
-    //dbgPrintf("\r\n[[%02x]]", c);
-
-    
     if( m_curr_beUrx->pktType == ePkt_0x01 )
     {
         if( m_urx_state == ST_URX_TOSSING) {
@@ -95,42 +82,16 @@ static int32_t serialSync_parseBytes( /*be_t *p_beUrx,*/ uint8_t *p_c, int len)
             {
                 if(m_curr_beUtx == &be_CUm)
                 {
-                    //dbgPrint("\r\nRX UCm");
                     be_new = &be_UCm; // Set new buffer to Uart->CoreM buffer
-                    //if(m_curr_beUrx->buffer[1] == m_curr_beUtx->buffer[1])
-                    //{
-                    //}
                     be_UCm_IndicateStartRecv();
                 }
                 else
                 if(m_curr_beUtx == &be_BU)
                 {
-                    //dbgPrint("\r\nRX UB");
                     be_new = &be_UB; // Set new buffer to Uart->CoreM buffer
-                    //if(m_curr_beUrx->buffer[1] == m_curr_beUtx->buffer[1])
-                    //{
-                    //}
                     be_UB_IndicateStartRecv();
                 }
-                /*TODO
-                else // We have a RESPONSE
-                if( EntityUartTx.owner == &OwnerBLE) // The sender was 
-                {
-                    be_new = &be_UB; // Set new buffer to Uart->Ble buffer
-                }
-                if( EntityUartTx.owner == &OwnerCoreM)
-                {
-                    be_new = &be_UCm; // Set new buffer to Uart->CoreM buffer
-                    //if(m_curr_beUrx->buffer[1] == m_curr_beUtx->buffer[1])
-                    //{
-                    //}
-                }
-                TODO*/
-                
-                /*
-                be_new = &be_UCm;
-                be_new = &be_UB;
-                */
+
                 be_tmp = m_curr_beUrx;
                 m_curr_beUrx = be_new;
                 m_curr_beUrx->pktType = be_tmp->pktType;
@@ -165,30 +126,11 @@ static int32_t serialSync_parseBytes( /*be_t *p_beUrx,*/ uint8_t *p_c, int len)
         }
     }
     
-
-
-    //=================
-    //===== SMALL =====
-    //=================
-    if( m_curr_beUrx->pktType == ePkt_K2)
-    {
-//TODO        r = blk_uart_uartRxS_bufferPush( c );    
-//TODO        r = procT2K2_checkPacketComplete( uartRxS_buffer, uartRxS_rp, uartRxS_wp, 'K' );
-        //todo ...
-    }
-    if( m_curr_beUrx->pktType == ePkt_0xC0)
-    {
-//TODO        r = blk_uart_uartRxS_bufferPush( c );    
-//TODO        r = procC0_checkPacketComplete( uartRxS_buffer, uartRxS_rp, uartRxS_wp );
-        //todo ...
-    }
-    
-
-    
     return(r);
 }
 
-static int32_t serialSync_parseByte( /*be_t *p_beUrx,*/ uint8_t b0)
+//-----------------------------------------------------------------------------
+static int32_t serialSync_parseByte(uint8_t b0)
 {
     return( serialSync_parseBytes( &b0, 1) );
 }
@@ -197,34 +139,17 @@ static int32_t serialSync_parseByte( /*be_t *p_beUrx,*/ uint8_t b0)
 static int serialSync_data_event_process_uart_in(uint8_t b0)
 {
     int sc = 0;
-
         
     if(m_curr_beUrx->pktType == ePkt_Unknown)
     {
         m_curr_beUrx->c1 = m_curr_beUrx->c0;
         m_curr_beUrx->c0 = b0;            
-        if(                          m_curr_beUrx->c0 == 0x01  )
+        if( m_curr_beUrx->c0 == 0x01 )
         {
             m_curr_beUrx->pktType = ePkt_0x01;
             serialSync_parseByte( 0x01 );
         }
-/*
-        if(                          m_curr_beUrx->c0 == 0xC0  )
-        {
-            m_curr_beUrx->pktType = ePkt_0xC0;
-            serialSync_parseByte( 0xC0 );
-        }
-        if( (m_curr_beUrx->c1 == 'T') && (m_curr_beUrx->c0 == '2')  )
-        {
-            m_curr_beUrx->pktType = ePkt_T2;
-            serialSync_parseByte( 'T' ); serialSync_parseByte( '2' );
-        }
-        if( (m_curr_beUrx->c1 == 'K') && (m_curr_beUrx->c0 == '2')  )
-        {
-            m_curr_beUrx->pktType = ePkt_K2;
-            serialSync_parseByte( 'K' ); serialSync_parseByte( '2' );
-        }
-*/
+
         // otherwise toss
     }
     else
@@ -235,7 +160,7 @@ static int serialSync_data_event_process_uart_in(uint8_t b0)
     return(sc);
 }
 
-
+//-----------------------------------------------------------------------------
 int DEVT_uartRxReady()
 {
     uint8_t  b0;
@@ -266,42 +191,6 @@ int DEVT_uartRxReady()
 // TX TX TX TX TX TX TX TX TX TX TX TX TX TX TX TX TX TX TX TX TX TX TX TX TX
 
 
-#if USE_INT_BLOCK_UART
-
-#include "nrf_drv_uart.h"
-#include "nrf_assert.h"
-#include "nordic_common.h"
-#include "nrf_drv_common.h"
-#include "nrf_gpio.h"
-#include "app_util_platform.h"
-
-//__STATIC_INLINE void interrupts_enable(uint8_t interrupt_priority)
-__STATIC_INLINE void UART_INTS_ON()
-{
-    uint8_t interrupt_priority = APP_IRQ_PRIORITY_LOW;
-    //CODE_FOR_UART
-    //(
-        nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_TXDRDY);
-        nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXTO);
-        nrf_uart_int_enable(NRF_UART0, NRF_UART_INT_MASK_TXDRDY |
-                                       NRF_UART_INT_MASK_RXTO);
-    //)
-    nrf_drv_common_irq_enable(UART0_IRQn, interrupt_priority);
-}
-
-//__STATIC_INLINE void interrupts_disable(void)
-__STATIC_INLINE void UART_INTS_OFF()
-{
-    //CODE_FOR_UART
-    //(
-        nrf_uart_int_disable(NRF_UART0, NRF_UART_INT_MASK_RXDRDY |
-                                        NRF_UART_INT_MASK_TXDRDY |
-                                        NRF_UART_INT_MASK_ERROR  |
-                                        NRF_UART_INT_MASK_RXTO);
-    //)
-    nrf_drv_common_irq_disable(UART0_IRQn);
-}
-#endif
 
 void be_Cxx_Indicate_BufSend_Done(void);
 void be_Cxx_Indicate_BufSend_Started(void);
@@ -321,13 +210,7 @@ bool ma_uart_packetTx_start(void)
     m_curr_beUtx->rdPtr++;
 //dbgPrint("\r\nB11"); //vTaskDelay(100);
 
-#if USE_INT_BLOCK_UART
-    UART_INTS_OFF();  // see also: https://devzone.nordicsemi.com/question/68176/bug-in-app_uart_fifoc/
-#endif
     err_code = app_uart_put( c );
-#if USE_INT_BLOCK_UART
-    UART_INTS_ON();
-#endif
 
     //dbgPrint("\r\nB22"); //vTaskDelay(100);
     if( err_code != NRF_SUCCESS )
@@ -379,13 +262,9 @@ int DEVT_uartTxEmpty()
     while( m_curr_beUtx->rdPtr < m_curr_beUtx->wrPtr )
     {
         c = m_curr_beUtx->buffer[m_curr_beUtx->rdPtr];
-#if USE_INT_BLOCK_UART
-        UART_INTS_OFF();  // see also: https://devzone.nordicsemi.com/question/68176/bug-in-app_uart_fifoc/
-#endif
+
         err_code = app_uart_put( c );
-#if USE_INT_BLOCK_UART
-        UART_INTS_ON();
-#endif
+
         if( err_code != NRF_SUCCESS )
         {
             dbgPrintf("\r\napp_uart_put ERROR = 0x%x", err_code );
@@ -466,9 +345,10 @@ void uart_thread_QueueSend(uniEvent_t *pEvt)
 #include "app_uart.h"
 
 
-bool m_uartIsDisabled = true;
+static bool m_uartIsDisabled = true;
 
-void uart_event_handle(app_uart_evt_t * p_event)
+//-----------------------------------------------------------------------------
+static void uart_event_handle(app_uart_evt_t * p_event)
 {
     static uniEvent_t LEvt;
 
@@ -503,9 +383,10 @@ void uart_event_handle(app_uart_evt_t * p_event)
     }    
 }
 
-// must be a multiple of 2
-//moved to myapp.h #define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
-//moved to myapp.h #define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
+
+//moved to myapp.h #define UART_TX_BUF_SIZE     256 // must be a multiple of 2           /**< UART TX buffer size. */
+//moved to myapp.h #define UART_RX_BUF_SIZE     256 // must be a multiple of 2           /**< UART RX buffer size. */
+//-----------------------------------------------------------------------------
 void ma_uart_Init(void)
 {
     uint32_t                     err_code;
@@ -517,14 +398,11 @@ void ma_uart_Init(void)
         CTS_PIN_NUMBER,
         APP_UART_FLOW_CONTROL_ENABLED,
         false,
-        UART_BAUDRATE_BAUDRATE_Baud115200
-        //UART_BAUDRATE_BAUDRATE_Baud38400
+        UART_BAUDRATE_BAUDRATE_Baud115200      //UART_BAUDRATE_BAUDRATE_Baud38400
     };
-
 
     if( m_uartIsDisabled == false)
         return;
-
     
     APP_UART_FIFO_INIT( &comm_params,
                        UART_RX_BUF_SIZE,
@@ -533,18 +411,16 @@ void ma_uart_Init(void)
                        APP_IRQ_PRIORITY_LOW,
                        err_code);
 
-    //dbgPrint("\r\nma_uart_Init");
-
     APP_ERROR_CHECK(err_code);
     m_uartIsDisabled = false;
 }
 
+
+//-----------------------------------------------------------------------------
 void pinsUART_TX_NotFloating(void);
 void pinsUART_RTS_NotFloating(void);
-
-void ma_uart_Deinit() //karel
+void ma_uart_Deinit()
 {
-
     //dbgPrint("\r\nma_uart_Deinit");
 
     m_uartIsDisabled = true;
@@ -552,8 +428,6 @@ void ma_uart_Deinit() //karel
 
     pinsUART_TX_NotFloating();
     pinsUART_RTS_NotFloating();
-
-
 }
 
 

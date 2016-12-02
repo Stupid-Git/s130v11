@@ -3,42 +3,33 @@
 
 
 //-----------------------------------------------------------------------------
-// VARS
-be_t *m_curr_beUtx;
-volatile be_t *m_curr_beUrx;
+//-----------------------------------------------------------------------------
+// Buffers
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+static uint8_t  buffer_UCm[1024];
+static uint8_t  buffer_CUm[1024];
 
+static uint8_t  buffer_UB[2048 + 7 + 64];
+static uint8_t  buffer_BU[1024 + 256]; //2016/11/15 added 256 to this buffer
 
-static uint8_t buffer_UCm[1024];
-static uint8_t buffer_CUm[1024];
+static uint8_t  buffer_Urx[128];
+static uint8_t  buffer_Utx[128];
 
-static uint8_t buffer_UB[2048 + 7 + 64];
-static uint8_t buffer_BU[1024 + 256]; //2016/11/15 added 256 to this buffer
-//static uint8_t buffer_BU[1024];       2016/11/15 added 256 to this buffer
+be_t            be_UCm;
+be_t            be_CUm;
 
-static uint8_t buffer_Urx[128];
-static uint8_t buffer_Utx[128];
+volatile be_t   be_UB;
+be_t            be_BU;
 
-be_t be_UCm;
-be_t be_CUm;
-volatile be_t be_UB;
-be_t be_BU;
-be_t be_Urx;
-be_t be_Utx;
+be_t            be_Urx;
+be_t            be_Utx;
 
-
-
+be_t           *m_curr_beUtx;
+volatile be_t  *m_curr_beUrx;
 
 //-----------------------------------------------------------------------------
-// CODE
-
-
-//#############################################################################
-//#############################################################################
-//##### gInit_ ################################################################
-//#############################################################################
-//#############################################################################
-//-----------------------------------------------------------------------------
-void be_Init_be(volatile be_t *be, uint8_t * buffer, uint32_t capacity)
+static void be_Init_be(volatile be_t *be, uint8_t * buffer, uint32_t capacity)
 {
     be->buffer = buffer;
     be->capacity = capacity;
@@ -48,14 +39,14 @@ void be_Init_be(volatile be_t *be, uint8_t * buffer, uint32_t capacity)
     be->pktType = ePkt_Unknown;
 }
 
-void gInit_be()
+static void be_Init()
 {
     be_Init_be(&be_UCm, buffer_UCm,sizeof(buffer_UCm));
     be_Init_be(&be_CUm, buffer_CUm,sizeof(buffer_CUm));
+    
     be_Init_be(&be_UB, buffer_UB,sizeof(buffer_UB));
     be_Init_be(&be_BU, buffer_BU,sizeof(buffer_BU));
 
-    
     be_Init_be(&be_Urx, buffer_Urx,sizeof(buffer_Urx));
     be_Init_be(&be_Utx, buffer_Utx,sizeof(buffer_Utx));
     m_curr_beUrx = &be_Urx;
@@ -63,31 +54,11 @@ void gInit_be()
 }
 
 
-bool gInit_All(void)
-{
-    bool bsts = false;
-    static bool initDone = false;
-    if( initDone )
-        return(true);
-    initDone = true;
-    
-   
-    gInit_be();
-    
-    return(bsts);
-}
-
-
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+//  processing blocks
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-// CUm State Machine
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-    
 typedef struct coreProcBlock_s
 {
     bool pending;
@@ -103,72 +74,36 @@ typedef struct coreProcBlock_s
 
 //.........................................................
 coreProcBlock_t cpb_BLE;
+extern int make_req_BLE( be_t *be_Req );
+extern int proc_rsp_BLE( be_t *be_Req,  be_t *be_Rsp );
+extern int proc_timeout_BLE( be_t *be_Req,  be_t *be_Rsp );
 
 //.........................................................
 coreProcBlock_t cpb_NANNY;
-int make_req_NANNY( be_t *be_Req );
-int proc_rsp_NANNY( be_t *be_Req,  be_t *be_Rsp );
-int proc_timeout_NANNY( be_t *be_Req,  be_t *be_Rsp );
+extern int make_req_NANNY( be_t *be_Req );
+extern int proc_rsp_NANNY( be_t *be_Req,  be_t *be_Rsp );
+extern int proc_timeout_NANNY( be_t *be_Req,  be_t *be_Rsp );
 
 //.........................................................
 coreProcBlock_t cpb_ADC;
-int make_req_ADC( be_t *be_Req );
-int proc_rsp_ADC( be_t *be_Req,  be_t *be_Rsp );
-int proc_timeout_ADC( be_t *be_Req,  be_t *be_Rsp );
+extern int make_req_ADC( be_t *be_Req );
+extern int proc_rsp_ADC( be_t *be_Req,  be_t *be_Rsp );
+extern int proc_timeout_ADC( be_t *be_Req,  be_t *be_Rsp );
 
 //.........................................................
 coreProcBlock_t cpb_BLN;
-int make_req_BLN( be_t *be_Req );
-int proc_rsp_BLN( be_t *be_Req,  be_t *be_Rsp );
-int proc_timeout_BLN( be_t *be_Req,  be_t *be_Rsp );
+extern int make_req_BLN( be_t *be_Req );
+extern int proc_rsp_BLN( be_t *be_Req,  be_t *be_Rsp );
+extern int proc_timeout_BLN( be_t *be_Req,  be_t *be_Rsp );
 
 //.........................................................
 coreProcBlock_t cpb_BLP;
-int make_req_BLP( be_t *be_Req );
-int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp );
-int proc_timeout_BLP( be_t *be_Req,  be_t *be_Rsp );
+extern int make_req_BLP( be_t *be_Req );
+extern int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp );
+extern int proc_timeout_BLP( be_t *be_Req,  be_t *be_Rsp );
 
 
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-// BU State Machine
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-
-#include "block_proc.h"
-
-int make_req_BLE( be_t *be_Req_Unused )
-{
-    uint16_t i;
-    
-    be_BU.rdPtr = 0;
-    be_BU.wrPtr = m_blkDn_len - 2;
-    be_BU.length = m_blkDn_len - 2;
-    for( i=0 ; i<be_BU.length; i++)
-    {
-        be_BU.buffer[i] = m_blkDn_buf[i];
-    }
-    return(0);
-}
-
-
-int proc_rsp_BLE( be_t *be_Req,  be_t *be_Rsp )
-{
-    //dbgPrint("\r\nproc_rsp_BLE");
-    callThisWhenUartPacketForBleIsRecieved(); //TODO  BlkUp_Go( m_curr_beUrx->buffer, m_curr_beUrx->length); //be_UB
-    return(0);
-}
-
-int proc_timeout_BLE( be_t *be_Req,  be_t *be_Rsp )
-{
-    //dbgPrint("\r\nproc_timeout_BLE");
-    return(0);
-}
 
 
 
@@ -263,10 +198,7 @@ void be_UB_IndicateDoneRecv(void)
 
 
 
-void core_Init(void)
-{
-     gInit_be();
-}
+
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -324,17 +256,9 @@ APP_TIMER_DEF(m_P8_timer_id);
 
 static void P8_timeout_handler(void * p_context)
 {
-//    uint32_t err_code;    
     UNUSED_PARAMETER(p_context);
 
-    
-    //dbgPrint("\r\nP8_timer_handler");
-
     P8TimerEvent();
-    
-    //err_code = app_timer_start(m_P8_timer_id, APP_TIMER_TICKS( P8_TIMER_PERIOD_MS, APP_TIMER_PRESCALER), NULL);
-    //APP_ERROR_CHECK(err_code);
-
 }
 
 
@@ -366,20 +290,14 @@ uint32_t P8_timer_stop(void)
     return(err_code);
 }
 
+//-----------------------------------------------------------------------------
+extern bool BLN_boot;
+bool BLN_boot = true;
+
+
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-typedef enum eSS
-{
-    SS_WAIT_STARTUP = 0,
-    SS1_WAIT_P8 = 1,
-    SS2_READY_FOR_XFER = 2,
-    SS3_TXRX_BUSY = 3,
-    SS4_TXRX_HOLDOFF = 4,
-    SS4_TXRX_DONE = 5,
-}eSS_t;
-
-//-------------------------------------
+//-----------------------------------------------------------------------------
 typedef struct SSQ_item_s
 {
     //char name[42];
@@ -389,6 +307,7 @@ typedef struct SSQ_item_s
 #define SSQ_LENGTH 10
 SSQ_item_t SSQ[SSQ_LENGTH];
 
+//-----------------------------------------------------------------------------
 uint8_t SSQ_len()
 {
     uint8_t count = 0;
@@ -401,24 +320,15 @@ uint8_t SSQ_len()
     return(count);
 }
 
-//uint8_t SS = 0;
-eSS_t SS = SS_WAIT_STARTUP;
-uint32_t P7_ticks = 0;        // from  mg_7_wkUpPerX50ms 1~255 * 50ms LOW TIME FOR WAKEUP SIGNAL, 0 = WHOLE ACCESS PERIOD
-uint32_t P8_ticks = 100 * 33; // from  mg_8_wkUpDelayX1ms
-extern bool BLN_boot;
-bool BLN_boot = true;
-void P7_P8_ticks_from_mg7_mg8(void)
-{
-    P8_ticks = APP_TIMER_TICKS( mg_8_wkUpDelayX1ms, APP_TIMER_PRESCALER);
-    P7_ticks = APP_TIMER_TICKS( mg_7_wkUpPerX50ms * 50, APP_TIMER_PRESCALER);
-}
 
+//-----------------------------------------------------------------------------
 void  SSQ_Item_Init( SSQ_item_t *pI )
 {
     //pI->name[0] = 0;
     pI->p_cpb = 0;
 }
 
+//-----------------------------------------------------------------------------
 void SSQ_Init()
 {
     int i;
@@ -428,6 +338,7 @@ void SSQ_Init()
     }
 }
 
+//-----------------------------------------------------------------------------
 void SSQ_AddCpb(coreProcBlock_t *p_cpb)
 {
     int i;
@@ -452,6 +363,8 @@ void SSQ_AddCpb(coreProcBlock_t *p_cpb)
     }
 }
 
+
+//-----------------------------------------------------------------------------
 void SSQ_Pop()
 {
     int i;
@@ -459,13 +372,13 @@ void SSQ_Pop()
     {    
         SSQ[i] = SSQ[i+1];
     }
-
     SSQ_Item_Init( &SSQ[i] );
 }
 
 
 
-//-------------------------------------
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//-----------------------------------------------------------------------------
 void WakePin_Assert(void)
 {  
 //NANNY pinWakeUp_Init();
@@ -474,16 +387,29 @@ void WakePin_Assert(void)
 
     dbgPrint("\r\n WakePin_Assert");
 }
+
+//-----------------------------------------------------------------------------
 void WakePin_Release(char *S) //void WakePin_Release(void)
 {
     pinWakeUp_Release();
     dbgPrint(S);
 }
 
-//-------------------------------------
-//void P7TimerStart( int32_t P8_ticks )
-//{
-//}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//-----------------------------------------------------------------------------
+typedef enum eSS
+{
+    SS_WAIT_STARTUP = 0,
+    SS1_WAIT_P8 = 1,
+    SS2_READY_FOR_XFER = 2,
+    SS3_TXRX_BUSY = 3,
+    SS4_TXRX_HOLDOFF = 4,
+    SS4_TXRX_DONE = 5,
+}eSS_t;
+eSS_t SS = SS_WAIT_STARTUP;
+
+//-----------------------------------------------------------------------------
 void P7_timerEvent() //  P7_timer_start => ... drive WakePin_Release, 
 {
     uniEvent_t LEvt;
@@ -494,9 +420,7 @@ void P7_timerEvent() //  P7_timer_start => ... drive WakePin_Release,
     core_thread_QueueSend( &LEvt );    
 }
 
-//void P8TimerStart( int32_t P7_ticks )
-//{
-//}
+//-----------------------------------------------------------------------------
 void P8TimerEvent()//  P8_timer_start => ... process SSQ again
 {
     uniEvent_t LEvt;
@@ -506,14 +430,10 @@ void P8TimerEvent()//  P8_timer_start => ... process SSQ again
     core_thread_QueueSend( &LEvt );    
 }
 
-void SS_Init()
-{
-    //P7_timer_init();
-    //P8_timer_init();
-    SSQ_Init();
-}
 
 
+
+//-----------------------------------------------------------------------------
 static uint32_t  autoTimeout_max = AUTOTIMEOUT_NONE;
 static uint32_t  autoTimeout_count = 0;
 void autoTimeout_Start( uint32_t timeout )
@@ -522,6 +442,7 @@ void autoTimeout_Start( uint32_t timeout )
     autoTimeout_count = 0;
 }
 
+//-----------------------------------------------------------------------------
 extern uint16_t m_conn_handle; // = BLE_CONN_HANDLE_INVALID
 void autoTimeout_onTick()
 {
@@ -549,8 +470,10 @@ void autoTimeout_onTick()
     }
 }
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+//-----------------------------------------------------------------------------
 static void SS_thread_process_event(uniEvent_t *pEvt)
 {
     uniEvent_t LEvt;
@@ -625,9 +548,6 @@ static void SS_thread_process_event(uniEvent_t *pEvt)
     //----- Triggers ----- core_ADC -----
     case evt_core_ADC_trigger: //dbgPrint("\r\nevt_core_ADC_trigger");
 
-#if USE_NADC
-#else
-#endif
         //----- if operation is already pending, then fall out -----
         if( cpb_ADC.pending == true) 
             break; // no next event set?!?!
@@ -840,7 +760,10 @@ static void SS_thread_process_event(uniEvent_t *pEvt)
         break;
     }
 }
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+//-----------------------------------------------------------------------------
 void Holdoff_timeout_processing()
 {
     uniEvent_t LEvt;
@@ -849,6 +772,19 @@ void Holdoff_timeout_processing()
     core_thread_QueueSend(&LEvt);      
 }
 
+
+//-----------------------------------------------------------------------------
+static uint32_t P7_ticks = 0;        // from  mg_7_wkUpPerX50ms 1~255 * 50ms LOW TIME FOR WAKEUP SIGNAL, 0 = WHOLE ACCESS PERIOD
+static uint32_t P8_ticks = 100 * 33; // from  mg_8_wkUpDelayX1ms
+void Update_P7_P8_ticks_from_mg7_mg8(void)
+{
+    P8_ticks = APP_TIMER_TICKS( mg_8_wkUpDelayX1ms, APP_TIMER_PRESCALER);
+    P7_ticks = APP_TIMER_TICKS( mg_7_wkUpPerX50ms * 50, APP_TIMER_PRESCALER);
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//-----------------------------------------------------------------------------
 static void SS_process_event(uniEvent_t *pEvt)
 {
     uniEvent_t LEvt;
@@ -983,7 +919,7 @@ static void SS_process_event(uniEvent_t *pEvt)
                     return;                            //TODO : pending -> processing rethink ?!? 
                 SSQ[0].p_cpb->processing = true;
                 
-                SSQ[0].p_cpb->make_req( SSQ[0].p_cpb->p_be ); //&be_CUm ); //FFAA    
+                SSQ[0].p_cpb->make_req( SSQ[0].p_cpb->p_be ); // Every single make_req is called here
                 
                 m_curr_beUtx =  SSQ[0].p_cpb->p_be ; //&be_CUm; or &be_BU;
                 
@@ -1034,81 +970,24 @@ static void SS_process_event(uniEvent_t *pEvt)
 
             break;
         
-
-/*OLD
-            SS = SS4_TXRX_DONE;
-        
-            if( (SSQ[0].p_cpb == &cpb_BLP ) && ( (BLN_boot == true) || ( m_bleIsConnected == false ) ) )
-            {
-                //WakePin_Release("\r\n WakePin_Release -  1/ evt_SSQ_TxRxOrTimeout_Done"); //WakePin_Release();
-                BLN_boot = false;
-            }
-            
-            SSQ_Pop(); // Get next command in Q if any
-            
-            if( SSQ_len() == 0 )
-            {
-                // Shutdown Uart Slow
-                //DA ma_uart_timer_Reason = Reason_shutdown;
-                //DA ma_uart_timer_start( APP_TIMER_TICKS( 5,  APP_TIMER_PRESCALER) );
-                
-                // Shutdown Uart Fast
-                ma_uart_Deinit();
-               
-                if( P7_ticks == 0) // sunaba
-                {
-                }
-                else
-                {
-                    WakePin_Release("\r\n WakePin_Release -  2/ evt_SSQ_TxRxOrTimeout_Done"); //WakePin_Release();
-                }
-                //TODO     pinWakeUp_Release();
-                //TODO     pinWakeUp_Deinit();
-            }
-           
-            
-            if( true ) // add new cmd to SSQ
-            {
-                LEvt.evtType = evt_SSQ_Check_Queue;
-                core_thread_QueueSend( &LEvt );
-            }
-            break;
-OLD*/
             
         default:
             //dbgPrintf("SS_process_event Event = %d not handledt\r\n", pEvt->evtType);
             break;
     }
 }
-
-
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-static void core_thread_process_queue_item(void * p_event_data, uint16_t event_size)
-{
-    //dbgPrint("\r\nPriorityThread -> ");
-    //uniEvent_t *pE = (uniEvent_t *)p_event_data ;
-    //dbgPrintf("Event i = %d\r\n", pE->i );
-    
-    //core_thread_process_event((uniEvent_t *)p_event_data);
-
-    dbgPrintf("\r\n####  pEvt->evtType = %d", ((uniEvent_t *)p_event_data)->evtType);
-
-    SS_thread_process_event((uniEvent_t *)p_event_data);
-    SS_process_event((uniEvent_t *)p_event_data);
-}
 
 #include "app_scheduler.h"
 
-//void ss_thread_init()
+
+//-----------------------------------------------------------------------------
 void core_thread_init()
 {
-    core_Init();
+    be_Init();
     
-    SS_Init();
+    SSQ_Init();
 
     cpb_NANNY.pending = false;
     cpb_NANNY.processing = false;
@@ -1123,7 +1002,22 @@ void core_thread_init()
     cpb_BLP.processing = false;
 }
 
-//void ss_thread_QueueSend(uniEvent_t *pEvt)
+//-----------------------------------------------------------------------------
+static void core_thread_process_queue_item(void * p_event_data, uint16_t event_size)
+{
+    //dbgPrint("\r\nPriorityThread -> ");
+    //uniEvent_t *pE = (uniEvent_t *)p_event_data ;
+    //dbgPrintf("Event i = %d\r\n", pE->i );
+    
+    //core_thread_process_event((uniEvent_t *)p_event_data);
+
+    dbgPrintf("\r\n####  pEvt->evtType = %d", ((uniEvent_t *)p_event_data)->evtType);
+
+    SS_thread_process_event((uniEvent_t *)p_event_data);
+    SS_process_event((uniEvent_t *)p_event_data);
+}
+
+//-----------------------------------------------------------------------------
 void core_thread_QueueSend(uniEvent_t *pEvt)
 {
     app_sched_event_put(pEvt, sizeof(uniEvent_t), core_thread_process_queue_item);

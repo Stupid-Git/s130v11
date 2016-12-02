@@ -452,7 +452,6 @@ int32_t app_tuds_Dcmd_handler(app_tuds_t *p_app_tuds, uint8_t *buf, uint8_t len)
         
         //callThisWhenBlePacketIsRecieved();
         //m_app_tuds.OnEvent();
-        //BlkUart_directUartSend(m_blkDn_buf, m_blkDn_len - 2); // Added "- 2" because there is no need to send the totalCheckSum
         //BlkUp_Go_Test();
     
     

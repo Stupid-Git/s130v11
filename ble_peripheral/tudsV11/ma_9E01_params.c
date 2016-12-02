@@ -36,7 +36,7 @@ static uint32_t mg_6_advX50ms_inTicks_Temp = 0;
 
 static uint32_t blp_rate = 60;
 
-void P7_P8_ticks_from_mg7_mg8(void);
+void Update_P7_P8_ticks_from_mg7_mg8(void);
 void WakePin_Release(char *S); //void  WakePin_Release(void);
 
 int make_req_BLP( be_t *be_Req )
@@ -74,8 +74,7 @@ int make_req_BLP( be_t *be_Req )
 }
 
 
-bool   m_ADC_notEnabled = true;
-    
+
 int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
 {
     dbgPrint("\r\nproc_rsp_BLP_01");
@@ -166,7 +165,7 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
     mg_6_advX50ms_inTicks = ((mg_6_advX50ms * 50 * 1000)/625);
 
     //----- Process mg_7, mg_8 ----- 
-    P7_P8_ticks_from_mg7_mg8();
+    Update_P7_P8_ticks_from_mg7_mg8();
 
     //----- Process mg_9 -----
     // mg_9_ADC_rate
@@ -255,7 +254,6 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
         bln_proc(BLN_PROC_FORCE_TRIGGER);
     }
 
-    m_ADC_notEnabled = false;
 
     if( NADC_mode == NADC_mode_FORCE_1 )
     {
@@ -275,12 +273,7 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
 int proc_timeout_BLP( be_t *be_Req,  be_t *be_Rsp )
 {
     dbgPrint("\r\nproc_timeout_BLP");
-
-
     blp_proc(BLP_PROC_UNPARK);
-
-    m_ADC_notEnabled = false;
-
     return(0);
 }
 

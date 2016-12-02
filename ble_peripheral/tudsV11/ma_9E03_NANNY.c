@@ -4,7 +4,7 @@
 
 
 // 0: STM32 disable reset on WAKE assertion too long 
-// 1: STM32 eanble reset on WAKE assertion too long 
+// 1: STM32 enable reset on WAKE assertion too long 
 static uint32_t NANNY_OnOff = 1;
 void prime_NANNY_OFF(void)
 {

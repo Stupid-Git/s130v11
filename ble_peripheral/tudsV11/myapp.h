@@ -52,10 +52,6 @@ extern "C"
 // Timer to time the ON period for the ADC load
 #define USE_ADCON_TIMER    1
 
-//---------------------------------------------------------
-// Allow Blocking of Interrupts during Uart Fifo Operation
-#define USE_INT_BLOCK_UART 0
-
 
 //---------------------------------------------------------
 // Use CRC instead of checksum
@@ -122,10 +118,10 @@ void blp_proc(int param);
 typedef enum epktType
 {
     ePkt_Unknown,
-    ePkt_0xC0,
+//    ePkt_0xC0,
     ePkt_0x01,
-    ePkt_T2,
-    ePkt_K2,
+//    ePkt_T2,
+//    ePkt_K2,
 } epktType_t;
 
 
@@ -236,7 +232,6 @@ int DEVT_uartRxReady(void);
 int DEVT_uartTxEmpty(void);
 
     
-bool gInit_All(void);
 
 bool ma_uart_packetTx_start(void);
 
@@ -254,10 +249,6 @@ void set_curr_beUrx_toStartPosition(void);
 void core_thread_init(void);
 void core_thread_QueueSend(uniEvent_t *pEvt);
 
-//-----------------------------------------------------------------------------
-// ss_thread.c
-void ss_thread_init(void);
-void ss_thread_QueueSend(uniEvent_t *pEvt);
 
 //-----------------------------------------------------------------------------
 // ma_constate.c

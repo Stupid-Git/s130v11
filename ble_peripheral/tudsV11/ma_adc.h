@@ -21,7 +21,6 @@ extern float vPre_2;
 #define ADC_PROC_ADC_TRIGGER    4
 
 
-extern bool   m_ADC_notEnabled;
 
 #if USE_NADC
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

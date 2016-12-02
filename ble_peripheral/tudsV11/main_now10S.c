@@ -11,18 +11,11 @@
 #define USE_DM_E  0
 
 
-#define USE_TUDS_U 1
-
-#define USE_TDCTRLS 0
+#define USE_TUDS 1
 
 
-//karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel
 #include "myapp.h" 
 #include "ma_adc.h"
-
-//buf_xxx #include "buf_xxxs.h" 
-//karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel-karel
-
 
 
 #include <stdint.h>
@@ -38,7 +31,7 @@
 #include "ble_advdata.h"
 #include "ble_advertising.h"
 
-#if USE_TUDS_U
+#if USE_TUDS
 #include "app_tuds.h"
 #endif
 
@@ -71,14 +64,17 @@
 #include "pstorage.h"
 #endif
 
+/*
 #include "app_trace.h"
 #include "bsp.h"
+*/
 #include "nrf_delay.h"
+/*
 #include "bsp_btn_ble.h"
 
 #include "sensorsim.h"
 #include "app_button.h"
-
+*/
 
 
 //#############################################################################
@@ -199,21 +195,12 @@ STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                 
 
 
 
-#if USE_TUDS_U
+#if USE_TUDS
 ble_tuds_t  m_ble_tuds;                                  // Structure to identify the BLKUP Service.
 uint32_t timers_init_tuds_part(void);
 void services_init_tuds_part(void);
 void application_timers_start_tuds_part(void);
 #endif
-
-
-
-#if USE_TDCTRLS
-#include "ble_TDctrl.h"
-static ble_tdctrls_t                    m_tdctrls;                               // Structure to identify the TDCTRL Service.
-#endif
-
-
 
 
 
@@ -344,9 +331,9 @@ static void timers_init()
     ma_uart_timer_init();    // Init the timer for Uart RxTimeout/Shutdown timing
     ma_holdoff_timer_init(); // Init the ... what is THIS timer ?!?
     
-    timers_init_tuds_part(); // USE_TUDS_U
-    //BlkDn_timer_init();    // USE_TUDS, USE_TUDS_U
-    //BlkUp_timer_init();    // USE_TUDS, USE_TUDS_U
+#if USE_TUDS
+    timers_init_tuds_part();
+#endif
 
     P7_timer_init();         // Init the Parameter 7 timer (micro-processor Wake Timing
     P8_timer_init();         // Init the Parameter 8 timer (micro-processor Wake Timing
@@ -578,25 +565,9 @@ static void dis_init(void)
 
 // TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS
 // TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS
-#if USE_TUDS_U
+#if USE_TUDS
 //extern void tuds_service_init(void);
 void services_init_tuds_part(void);
-#endif
-
-
-
-#if USE_TDCTRLS
-static void tdctrls_init()
-{
-    uint32_t                   err_code;
-
-    ble_tdctrls_init_t   tdctrls_init;    
-    memset(&tdctrls_init, 0, sizeof(tdctrls_init));
-    
-    err_code = ble_tdctrls_init(&m_tdctrls, &tdctrls_init);
-
-    APP_ERROR_CHECK(err_code);
-}
 #endif
 
 
@@ -682,29 +653,16 @@ static void  dfu_init(void)
  */
 static void services_init(void)
 {
-    dbgPrint("\r\nS[0]");
 #if USE_DIS
-    dbgPrint("\r\nS[1]");
     dis_init();
 #endif
 
-    dbgPrint("\r\nS[8]");  // moved up
-    dfu_init();            // moved up
-    dbgPrint("\r\nS[9]");  // moved up
+    dfu_init();
 
-#if USE_TUDS_U
-    dbgPrint("\r\nS[6]");
-    services_init_tuds_part();  // USE_TUDS_U
+#if USE_TUDS
+    services_init_tuds_part();
 #endif
 
-#if USE_TDCTRLS
-    dbgPrint("\r\nS[7]");
-    tdctrls_init();
-#endif
-
-//    dbgPrint("\r\nS[8]");
-//    dfu_init();
-//    dbgPrint("\r\nS[9]");
 }
 
 
@@ -1030,15 +988,10 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
     dm_ble_evt_handler(p_ble_evt);  //OK  Bonding -> BLE_GAP_EVT_SEC_PARAMS_REQUEST, BLE_GAP_EVT_CONN_SEC_UPDATE
 #endif
     
-#if USE_TUDS_U
+#if USE_TUDS
     ble_tuds_on_ble_evt(&m_ble_tuds, p_ble_evt); //karel
 #endif
     
-#if USE_TDCTRLS
-    ble_tdctrls_on_ble_evt(&m_tdctrls, p_ble_evt); //karel
-#endif
-
-
     ble_conn_params_on_ble_evt(p_ble_evt);   //asasasasOK
     bsp_btn_ble_on_ble_evt(p_ble_evt); // BSP call HOW DO WE USE IT ???!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -1467,17 +1420,6 @@ static void power_manage(void)
 }
 
 
-void pstorage_test_store_and_update(void);
-
-
-
-
-void pinsTUG_Init(void);
-void pinsTUG_25_Assert(void);
-void pinsTUG_25_Release(void);
-void pinsTUG_25_Invert(void);
-
-extern uint8_t mg_ShortenedName_rsp26[26+2];
 
 static void power_failure_sys_event_handler(uint32_t sys_evt)
 {
@@ -1591,6 +1533,12 @@ void reset_testing_stuff()
     
 }
 
+
+void pinsTUG_Init(void);
+void pinsTUG_25_Assert(void);
+void pinsTUG_25_Release(void);
+void pinsTUG_25_Invert(void);
+
 //debug uint32_t DUMB_counterA = 0;
 
 int main_tuds(void)
@@ -1665,8 +1613,6 @@ int main_tuds(void)
 	//SAS  err_code = sd_power_mode_set(power_mode);
 
 
-    m_ADC_notEnabled = true;
-
 #if USE_NADC
     NADC_proc( NADC_action_RESET);
 #else
@@ -1679,21 +1625,13 @@ int main_tuds(void)
     GP_timer_start( APP_TIMER_TICKS(GP_TIMER_PERIOD_1000MS, APP_TIMER_PRESCALER) );
 
     //debug reset_testing_stuff();
-    
 
     dbgPrint("\r\nMain setup Finished");
     
-
-    gInit_All();
-
     extern bool BLN_boot;
     BLN_boot = true;
-    
+
     //debug DUMB_counterA = 0;
-
-
-   // pstorage_test_store_and_update();
-
     //debug pinsTUG_Init();
 
     for (;;)
