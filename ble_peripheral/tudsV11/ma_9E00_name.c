@@ -102,17 +102,17 @@ bool mg_ManufacturerSpecific_rsp26_IsUpdated(uint8_t * buffer)
 
 int make_req_BLN( be_t *be_Req )
 {
-    uint16_t cs;
+    uint16_t crc;
     
     be_Req->buffer[0] = 0x01;
     be_Req->buffer[1] = 0x9E;
     be_Req->buffer[2] = 0x00;
     be_Req->buffer[3] = 0; //Len LSB
     be_Req->buffer[4] = 0; //Len MSB
-    cs = CRC_START_SEED; //0x0000;//0xFFFF;
-    cs = crc16_compute (be_Req->buffer, 5, &cs);
-    be_Req->buffer[5] = (cs >> 8) & 0x00ff; // CRC MSB first
-    be_Req->buffer[6] = (cs >> 0) & 0x00ff;
+    crc = CRC_START_SEED; //0x0000;//0xFFFF;
+    crc = crc16_compute (be_Req->buffer, 5, &crc);
+    be_Req->buffer[5] = (crc >> 8) & 0x00ff; // CRC MSB first
+    be_Req->buffer[6] = (crc >> 0) & 0x00ff;
 
     be_Req->rdPtr = 0;
     be_Req->wrPtr = 7;

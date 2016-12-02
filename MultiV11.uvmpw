@@ -25,4 +25,8 @@
     <PathAndName>.\ble_peripheral\ud2V11\pca10028\s130_with_dfu\arm5_no_packs\ud2v11_s130_with_dfu_pca10028.uvprojx</PathAndName>
   </project>
 
+  <project>
+    <PathAndName>.\ble_peripheral\fudsV11\pca10028\s130_with_dfu\arm5_no_packs\fudsv11_s130_with_dfu_pca10028.uvprojx</PathAndName>
+  </project>
+
 </ProjectWorkspace>

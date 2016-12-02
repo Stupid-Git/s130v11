@@ -251,8 +251,6 @@ void core_thread_QueueSend(uniEvent_t *pEvt);
 //-----------------------------------------------------------------------------
 // ma_constate.c
 
-#define USE_OLD_PWU 1
-
 void pinWakeUp_Init(void);
 void pinWakeUp_Assert(void);
 void pinWakeUp_Release(void);
@@ -266,7 +264,7 @@ extern uint8_t mg_7_wkUpPerX50ms;  // period for Wake Signal x 50ms (1~255) -> 5
 extern uint8_t mg_8_wkUpDelayX1ms; // delay to SOH for Wake Signal x 1ms (1~255) -> 1ms ~ 255ms
 extern uint8_t mg_9_ADC_rate;      // do Battery power measurement  0:Off, every 1~255 seconds
 extern uint8_t mg_10_loadADC;      // do Battery Loaded measurement 0:Off, every 1~255 minutes
-extern int8_t mg_11_power;        // set output power level (signed byte) e.g. -40, -30, -20, -16, -1, -8, -4, 0 , +4 dBm
+extern int8_t  mg_11_power;        // set output power level (signed byte) e.g. -40, -30, -20, -16, -1, -8, -4, 0 , +4 dBm
 extern uint8_t mg_12_9E00_rate;    // the rate to read (9E_00) and update Advertising Info (0-once only after reset, 0x01~0x3F:1~63minutes, 0x81~0xBF: 1~63seconds) 
 
 extern uint32_t mg_6_advX50ms_inTicks;

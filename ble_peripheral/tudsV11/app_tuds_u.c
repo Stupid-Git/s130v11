@@ -103,9 +103,9 @@ static int32_t blk_up_set( uint8_t *pkt, uint16_t len)
         //Error - data too long 
         return(1);
     }
-#if 0 // _USE_CRC
-    cs = CRC_START_SEED; //0x0000;//0xFFFF;
-    cs = crc16_compute (&pkt[0], len, &cs);
+#if 0 // _CRC
+    //cs = CRC_START_SEED; //0x0000;//0xFFFF;
+    //cs = crc16_compute (&pkt[0], len, &cs);
 #else
     cs = 0;
     for(i=0 ; i < len; i++)

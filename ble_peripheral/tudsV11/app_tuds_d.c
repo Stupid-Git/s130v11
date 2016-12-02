@@ -222,9 +222,9 @@ static int32_t blk_dn_chk()
         return(2);
 
     cs_pkt = m_blkDn_buf[m_blkDn_len - 2] | (m_blkDn_buf[m_blkDn_len - 1]<<8);
-#if 0 // _USE_CRC
-    cs_now = CRC_START_SEED; //0x0000;//0xFFFF;
-    c_now = crc16_compute( &m_blkDn_buf[0], m_blkDn_len - 2, cs_now);
+#if 0 // _CRC
+    //cs_now = CRC_START_SEED; //0x0000;//0xFFFF;
+    //c_now = crc16_compute( &m_blkDn_buf[0], m_blkDn_len - 2, cs_now);
 #else    
     cs_now = 0;
     for(i=0 ; i < m_blkDn_len - 2; i++)
