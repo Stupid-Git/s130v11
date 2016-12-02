@@ -108,6 +108,19 @@ static uint8_t cnt_10m = 0;
 int adc_count()
 {
     int adcMeasureType = 0;
+    
+    //Hammer
+    if(mg_9_ADC_rate==0)
+    {
+        cnt_9 = 0;
+        cnt_10s = 0;
+        cnt_10m = 0;
+        
+        adcMeasureType = 0;
+        return(adcMeasureType);
+    }
+    //Hammer
+    
     if( cnt_9 < mg_9_ADC_rate )
         cnt_9++;
     
@@ -381,6 +394,7 @@ int NADC_proc( eNADC_action action)
                 cnt_10m = 0;
 
                 g_PRE = false; // OLD - get out of PRE mode
+                             
             }
         }
 

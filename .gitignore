@@ -8,6 +8,9 @@ ble_peripheral/tudsV11/pca10028/s130_with_dfu/arm5_no_packs/_build
 # ble_peripheral/ud2V11
 ble_peripheral/ud2V11
 
+# ble_peripheral/fudsV11
+ble_peripheral/fudsV11
+
 
 # dfu/bootloader
 dfu/bootloader/pca10036/

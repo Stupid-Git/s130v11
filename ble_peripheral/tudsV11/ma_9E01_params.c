@@ -263,6 +263,12 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
         NADC_set_ADC_L_GO();
         NADC_proc(NADC_action_CHECK);
     }
+    else
+    if( NADC_mode == NADC_mode_NORMAL )
+    {
+        //reset counters
+        //cnt_9 = 0; //Hammer see fix called Hammer
+    }
 
     return(0);
 }
