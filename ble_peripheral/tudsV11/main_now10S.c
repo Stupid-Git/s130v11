@@ -607,9 +607,6 @@ ble_dfu_t *lp_dfu;
 ble_dfu_evt_t * lp_evt;
 ble_dfu_evt_t saved_dfu_evt;
 
-//void NANNY_dfu_schedule_9E_OFF_cmd(void);
-//void NANNY_call_after_9E_OFF_cmd(void);
-
 void NANNY_normalBoot_schedule_9E_ON_cmd(void)
 {
     prime_NANNY_ON();
@@ -1469,7 +1466,6 @@ static void power_manage(void)
     APP_ERROR_CHECK(err_code);
 }
 
-uint32_t DUMB_counterA = 0;
 
 void pstorage_test_store_and_update(void);
 
@@ -1595,16 +1591,16 @@ void reset_testing_stuff()
     
 }
 
+//debug uint32_t DUMB_counterA = 0;
 
 int main_tuds(void)
 {
     bool erase_bonds;
     //uint32_t err_code;
 
-//    NANNY_0();
     pinWakeUp_Init();
-    // Initialize.
-    //app_trace_init();
+
+    //not used - app_trace_init();
     
     dbgPrint_Init();     // karel - debug via spi-master SDO
 #if USE_PRINTF_OVER_SDO
@@ -1625,76 +1621,40 @@ int main_tuds(void)
     dbgPrint("\r\nCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
     dbgPrint("\r\n");
 #endif
-
         
 	ma_adc_config();
-    dbgPrint("\r\n[1]");
 
     timers_pre_init();
     timers_init();
-    dbgPrint("\r\n[2]");
 
-    //!!!!!!!!!!! BSP UNUSED?!?!
-    //buttons_leds_init(&erase_bonds);      //$$ 2//!!!!!!!!!!!
-    //!!!!!!!!!!!
-    dbgPrint("\r\n[3]");
-
-    ble_stack_init();                     // <> $$ 3    NEWdevice_manager_init(true);//nds);  //$$ 4 ????
-    dbgPrint("\r\n[4]");
+    ble_stack_init();
 
 #if USE_APPSH
-    scheduler_init();  // <> NOTE: KAREL Adjust Queue size etc as needed +++++++++++
-    priority_scheduler_init();  // <> NOTE: KAREL Adjust Queue size etc as needed +++++++++++
-    dbgPrint("\r\n[5]");
+    scheduler_init();           // <> NOTE: KAREL Adjust Queue size etc as needed
+    priority_scheduler_init();  // <> NOTE: KAREL Adjust Queue size etc as needed
 #else
 #endif
     
-    
 #if USE_DM
     erase_bonds = false;
-    device_manager_init(erase_bonds);  //++++++++++++++++++
-    dbgPrint("\r\n[6]");
+    device_manager_init(erase_bonds);
 #endif
-
 
 
     mg_ShortenedName_rsp26_set("");
     mg_ShortenedName_rsp26_set(DEVICE_NAME);
-    gap_params_init( (char*)mg_ShortenedName_rsp26 );//DEVICE_NAME );                    //$$ 5
-    dbgPrint("\r\n[7]");
-    //this works here 
-    //    gap_device_name_only_set("FRED");
+    gap_params_init( (char*)mg_ShortenedName_rsp26 );
 
-    services_init();                      //$$ 6
-    dbgPrint("\r\n[8]");
-
+    services_init();
 
     mg_ManufacturerSpecific_rsp26_setInitialValue();
     mg_6_advX50ms_inTicks = APP_ADV_INTERVAL_1000MS;
-    advertising_init_mg_new(mg_6_advX50ms_inTicks); //advertising_init();  //$$ 7 must call services_init before advertising init
+    advertising_init_mg_new(mg_6_advX50ms_inTicks);
     
-    dbgPrint("\r\n[9]");
-
-
-    conn_params_init();                   //$$ 8
-    dbgPrint("\r\n[6]");
-
-
-    // Start execution.
-    //timers_start();      //!    application_timers_start();
-    //bas_timer_start(); -- commented out for now (debug)
-
-
-
-/* _PRE_advertising
-    err_code = ble_advertising_start(BLE_ADV_MODE_FAST);                  //$$ 10 !!!!
-    dbgPrint("\r\n[6]");
-    APP_ERROR_CHECK(err_code);
-    dbgPrint("\r\n[14]");
-*/
-
+    conn_params_init();
 
     uart_thread_init();    // ma_uart.c
+
     core_thread_init();    // ma_thread.c
 
 
@@ -1718,22 +1678,23 @@ int main_tuds(void)
     
     GP_timer_start( APP_TIMER_TICKS(GP_TIMER_PERIOD_1000MS, APP_TIMER_PRESCALER) );
 
-    reset_testing_stuff();
+    //debug reset_testing_stuff();
     
+
     dbgPrint("\r\nMain setup Finished");
     
-    gInit_All();
 
+    gInit_All();
 
     extern bool BLN_boot;
     BLN_boot = true;
     
-    DUMB_counterA = 0;
+    //debug DUMB_counterA = 0;
 
 
    // pstorage_test_store_and_update();
 
-    pinsTUG_Init();
+    //debug pinsTUG_Init();
 
     for (;;)
     {
@@ -1742,12 +1703,12 @@ int main_tuds(void)
         app_sched_execute();
 #else
 #endif
-        pinsTUG_25_Assert();
+        //debug pinsTUG_25_Assert();
         power_manage();
-        pinsTUG_25_Release();
-        //pinsTUG_25_Invert();
+        //debug pinsTUG_25_Release();
+        //debug //pinsTUG_25_Invert();
 
-        DUMB_counterA++;
+        //debug DUMB_counterA++;
     }
 }
 

@@ -26,15 +26,14 @@ uint8_t mg_7_wkUpPerX50ms   = 0;    // period for Wake Signal x 50ms (1~255) -> 
 uint8_t mg_8_wkUpDelayX1ms  = 100;  // delay to SOH for Wake Signal x 1ms (1~255) -> 1ms ~ 255ms
 uint8_t mg_9_ADC_rate       = 0;    // do Battery power measurement  0:Off, every 1~255 seconds
 uint8_t mg_10_loadADC       = 0;    // do Battery Loaded measurement 0:Off, every 1~255 minutes
-int8_t mg_11_power         = 0;    // set output power level (signed byte) e.g. -40, -30, -20, -16, -1, -8, -4, 0 , +4 dBm
+int8_t  mg_11_power         = 0;    // set output power level (signed byte) e.g. -40, -30, -20, -16, -1, -8, -4, 0 , +4 dBm
 uint8_t mg_12_9E00_rate     = 0;    // the rate to read (9E_00) and update Advertising Info (0-once only after reset, 0x01~0x3F:1~63minutes, 0x81~0xBF: 1~63seconds) 
 
 uint32_t mg_12_9E00_rate_inSeconds = 0;
 
 uint32_t mg_6_advX50ms_inTicks;
-uint32_t OLD_mg_6_advX50ms_inTicks = 0;
+static uint32_t mg_6_advX50ms_inTicks_Temp = 0;
 
-//uint32_t mg_12_9E00_rate_inSeconds;
 static uint32_t blp_rate = 60;
 
 void P7_P8_ticks_from_mg7_mg8(void);
@@ -163,7 +162,7 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
     //----- Process mg_6 ----- 
     if(mg_6_advX50ms < 1) mg_6_advX50ms =   1; // 0 is invalid
 
-    OLD_mg_6_advX50ms_inTicks = mg_6_advX50ms_inTicks;
+    mg_6_advX50ms_inTicks_Temp = mg_6_advX50ms_inTicks;
     mg_6_advX50ms_inTicks = ((mg_6_advX50ms * 50 * 1000)/625);
 
     //----- Process mg_7, mg_8 ----- 
@@ -220,8 +219,8 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
         mg_12_9E00_rate_inSeconds = 0;
     }
 
-    //gap_device_name_only_set("\r\nmg_newBleName");
-    if( mg_6_advX50ms_inTicks != OLD_mg_6_advX50ms_inTicks)
+    //gap_device_name_only_set("mg_newBleName");
+    if( mg_6_advX50ms_inTicks != mg_6_advX50ms_inTicks_Temp)
     {
         advertising_init_mg_new(mg_6_advX50ms_inTicks);      // set new advertising rate
     }
@@ -291,13 +290,11 @@ typedef enum
 {
     BLP_BOOT,
     BLP_ENDED,
-    //BLP_COUNTING,
     BLP_PARKED,
 } blp_state_t;
 static blp_state_t blp_sm = BLP_BOOT;
 
 static uint32_t blp_cnt = 0;
-//static uint32_t blp_rate = 60;
 
 #define BLP_BOOT_RATE  1 //was 5 before ADC chech on boot up  //2016/11/04 with ADC voltage test this is too long ?
 //#define BLP_BOOT_RATE  1
@@ -371,81 +368,4 @@ void blp_proc(int param)
     
 }
 
-
-
-/*
-void blp_proc_OLD(int param)
-{
-    if(param == BLP_PROC_INIT_TRIGGER) // Basically called on power up
-    {
-        blp_cnt = 0;
-        blp_rate = BLP_BOOT_RATE;
-        blp_sm = BLP_BOOT;
-        return;
-    }
-    if(param == BLP_PROC_UNPARK)
-    {
-        blp_sm = BLP_COUNTING;
-        return;
-    }
-
-    if(param == BLP_PROC_FORCE_TRIGGER) // After Disconnect, check for updated parameters
-    {
-        blp_rate = BLP_NORM_RATE;
-        blp_cnt = blp_rate - 1;
-        blp_sm = BLP_COUNTING;
-        param = BLP_PROC_TIMER_TICK; // force
-    }
-
-    
-    if(param == BLP_PROC_TIMER_TICK)
-    {
-        
-        switch(blp_sm)
-        {
-        case BLP_BOOT: // Power-up count-down to wait for microprocessor to boot
-            if (blp_cnt < blp_rate)
-                blp_cnt++;
-
-            if( blp_cnt >= blp_rate)
-            {
-                blp_rate = BLP_NORM_RATE;
-                blp_cnt = blp_rate - 1;
-                blp_sm = BLP_COUNTING;
-            }
-            else
-            {
-                break;
-            }
-
-        case BLP_COUNTING:
-            if (blp_cnt < blp_rate)
-                blp_cnt++;
-
-            if ( (blp_cnt >= blp_rate) && (blp_rate != 0) )
-            {
-                if( m_bleIsConnected == false) 
-                {
-                    blp_cnt = 0;
-                    uniEvent_t LEvt;
-                    LEvt.evtType = evt_core_BLP_trigger;
-                    core_thread_QueueSend(&LEvt);
-                    blp_sm = BLP_PARKED;
-                }                
-            }
-            break;
-
-        case BLP_PARKED:
-            if (blp_cnt < blp_rate)
-                blp_cnt++;
-            break;
-            
-        default:
-            blp_sm = BLP_BOOT;
-            break;
-        }
-    }
-    
-}
-*/
 

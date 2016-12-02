@@ -118,6 +118,7 @@ void blp_proc(int param);
 //=============================================================================
 // TYPES
 
+
 typedef enum epktType
 {
     ePkt_Unknown,
@@ -148,8 +149,8 @@ typedef struct be_s
 } be_t;
 
 
-//typedef struct frameUni_s frameUni_t;
-void NANNY_call_after_9E_OFF_cmd(void); //main
+
+void NANNY_call_after_9E_OFF_cmd(void);
 
 void prime_NANNY_OFF(void);
 void prime_NANNY_ON(void);
@@ -189,8 +190,6 @@ typedef enum eEvtType
     evt_SSQ_Check_Queue           = 50,                // 14
     evt_SSQ_StartNext_TxRx        = 51,                // 15
     evt_SSQ_TxRxOrTimeout_Done    = 52,                // 16
-    
-
 
 } eEvtType_t;
 
@@ -204,22 +203,16 @@ typedef struct uniEvent_s
 //=============================================================================
 // predefines
 // Buffers
+extern           be_t  be_CUm;
+extern           be_t  be_UCm;
 
-#if( CORE_SLAVE == 1 )  
-extern be_t be_CUs;
-extern be_t be_UCs;
-#endif
+extern           be_t  be_BU;
+extern volatile  be_t  be_UB;
 
-extern be_t be_CUm;
-extern be_t be_UCm;
-extern be_t be_BU;
-extern volatile be_t be_UB;
-extern be_t be_Urx;
+extern           be_t  be_Urx;
 
-extern uint32_t DUMB_counterA;
-
-extern volatile be_t *m_curr_beUrx;
-extern be_t *m_curr_beUtx;
+extern volatile  be_t  *m_curr_beUrx;
+extern           be_t  *m_curr_beUtx;
 
 
 void core_thread(void * arg);
@@ -227,19 +220,9 @@ void uart_thread(void * arg);
 
 
 
-
 #include "ma_timers.h"
-// rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_
-// rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_
-
-
-
-// rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_
-// rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_ rn_
-
-
-// ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_
-// ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_
+#include "app_tuds.h"
+#include "u_proc0x01.h"
 
 
 void ma_adc_config(void);
@@ -248,22 +231,9 @@ void ma_adc_config(void);
 void ma_uart_Init(void);
 void ma_uart_Deinit(void);
 
-#include "app_tuds.h"
-//int callThisWhenUartPacketForBleIsRecieved(void); //ma_join.c
-//int callThisWhenBlePacketIsRecieved(app_tuds_evt_t * p_app_tuds_event);  //ma_join.c
-
-// ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_
-// ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_
-    
 
 int DEVT_uartRxReady(void);
 int DEVT_uartTxEmpty(void);
-    
-
-
-
-#include "u_proc0x01.h"
-
 
     
 bool gInit_All(void);
@@ -322,8 +292,6 @@ void mg_ManufacturerSpecific_rsp26_setInitialValue(void);
 void mg_ShortenedName_rsp26_set(char * device_name);
 
 
-//DEFUNCT? extern bool m_doUpdateAdvertisingName;
-//DEFUNCT? extern char m_UpdatedAdvertisingName[];
 void gap_device_name_only_set(char * nextName);
 //-----------------------------------------------------------------------------
 

@@ -128,7 +128,6 @@ static int32_t serialSync_parseBytes( /*be_t *p_beUrx,*/ uint8_t *p_c, int len)
                 TODO*/
                 
                 /*
-                be_new = &be_UCs;
                 be_new = &be_UCm;
                 be_new = &be_UB;
                 */

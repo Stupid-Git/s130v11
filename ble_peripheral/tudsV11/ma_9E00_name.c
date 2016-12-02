@@ -159,13 +159,6 @@ int proc_rsp_BLN( be_t *be_Req,  be_t *be_Rsp )
         advertising_init_mg_new(mg_6_advX50ms_inTicks);  // This is called to set new mg_ManufacturerSpecific_rsp26, (mg_ShortenedName_rsp26,)
     }
     
-    //for( i=35; i<61;i++)
-    //{
-    //    mg_ManufacturerSpecific_rsp26[i-35] = be_Rsp->buffer[i];
-    //}   
-    //advertising_init_mg_new(mg_6_advX50ms_inTicks);  // This is called to set new mg_ManufacturerSpecific_rsp26, (mg_ShortenedName_rsp26,)
-    
-
     bln_proc(BLN_PROC_UNPARK);
 
     return(0);
