@@ -103,7 +103,6 @@ static int32_t blk_up_set( uint8_t *pkt, uint16_t len)
         //Error - data too long 
         return(1);
     }
-    
 #if 0 // _USE_CRC
     cs = CRC_START_SEED; //0x0000;//0xFFFF;
     cs = crc16_compute (&pkt[0], len, &cs);
@@ -112,7 +111,7 @@ static int32_t blk_up_set( uint8_t *pkt, uint16_t len)
     for(i=0 ; i < len; i++)
         cs = cs + pkt[i];
     //cs = get_checksum(pkt, 0, len);
-#endif
+#endif   
     m_blkUp_chkSumLSB = (uint8_t)((cs>>0) & 0x00FF);
     m_blkUp_chkSumMSB = (uint8_t)((cs>>8) & 0x00FF);
     

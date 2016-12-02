@@ -109,19 +109,10 @@ int make_req_BLN( be_t *be_Req )
     be_Req->buffer[2] = 0x00;
     be_Req->buffer[3] = 0; //Len LSB
     be_Req->buffer[4] = 0; //Len MSB
-#if _USE_CRC
-//nerror    
     cs = CRC_START_SEED; //0x0000;//0xFFFF;
     cs = crc16_compute (be_Req->buffer, 5, &cs);
     be_Req->buffer[5] = (cs >> 8) & 0x00ff; // CRC MSB first
     be_Req->buffer[6] = (cs >> 0) & 0x00ff;
-#else
-    cs = get_checksum  (be_Req->buffer, 0, 5 );
-    //be_Req->buffer[5] = 0x9F;
-    //be_Req->buffer[6] = 0x00;
-    be_Req->buffer[5] = (cs >> 0) & 0x00ff;
-    be_Req->buffer[6] = (cs >> 8) & 0x00ff;
-#endif
 
     be_Req->rdPtr = 0;
     be_Req->wrPtr = 7;

@@ -480,17 +480,10 @@ int make_req_ADC( be_t *be_Req )
     be_Req->buffer[8] = (batVoltage78 >> 8) & 0x00ff;
     
     uint16_t cs;
-#if _USE_CRC
-    //nerror
     cs = CRC_START_SEED; //0x0000;//0xFFFF;
     cs = crc16_compute (be_Req->buffer, 9, &cs);
     be_Req->buffer[ 9] = (cs >> 8) & 0x00ff; // CRC MSB first
     be_Req->buffer[10] = (cs >> 0) & 0x00ff;
-#else
-    cs = get_checksum  (be_Req->buffer, 0, 9 );
-    be_Req->buffer[ 9] = (cs >> 0) & 0x00ff;
-    be_Req->buffer[10] = (cs >> 8) & 0x00ff;
-#endif
 
     be_Req->rdPtr = 0;
     be_Req->wrPtr = 11;

@@ -229,7 +229,7 @@ static int32_t blk_dn_chk()
     {
         cs_now += m_blkDn_buf[i];
     }
-#endif    
+#endif 
     if( cs_now != cs_pkt)
         return( DN_CHK_CHKSUM_NG );
     
