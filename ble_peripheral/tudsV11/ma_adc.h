@@ -16,7 +16,7 @@ extern float vPre_2;
 //-----------------------------------------------------------------------------
 #define ADC_PROC_INIT_TRIGGER   0
 #define ADC_PROC_TIMER_TICK     1
-#define ADC_PROC_TIMER_TICK_TWO 2 // The adcOn_timer delay for milliseconds to load the battery
+#define ADC_PROC_TIMER_TICK_TWO 2 // The battLoad_timer delay for milliseconds to load the battery
 #define ADC_PROC_UNPARK         3
 #define ADC_PROC_ADC_TRIGGER    4
 

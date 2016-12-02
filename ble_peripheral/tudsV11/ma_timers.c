@@ -190,11 +190,7 @@ static void GP_timeout_handler(void * p_context) // Effectively a 1 Second timer
 
     if( g_PRE == true )
     {
-#if USE_NADC
         NADC_proc( NADC_action_ONE_SECOND);
-#else
-        adc_proc_PRE(ADC_PROC_TIMER_TICK);
-#endif
         if( g_PRE == false )
         { 
             // _PRE_advertising
@@ -206,11 +202,7 @@ static void GP_timeout_handler(void * p_context) // Effectively a 1 Second timer
     }
     else
     {    
-#if USE_NADC
         NADC_proc( NADC_action_ONE_SECOND);
-#else
-        adc_proc(ADC_PROC_TIMER_TICK);
-#endif
         blp_proc(BLP_PROC_TIMER_TICK);
         bln_proc(BLN_PROC_TIMER_TICK);
     }        
@@ -277,9 +269,9 @@ uint32_t GP_timer_stop(void)
 
 void autoTimeout_onTick(void);
 #if USE_ADCON_TIMER
-APP_TIMER_DEF(m_adcOn_timer_id);
+APP_TIMER_DEF(m_battLoad_timer_id);
 
-static void adcOn_timeout_handler(void * p_context) // Aim for around 1ms
+static void battLoad_timeout_handler(void * p_context) // Aim for around 1ms
 {
     UNUSED_PARAMETER(p_context);
     uint32_t err_code;    
@@ -288,11 +280,7 @@ static void adcOn_timeout_handler(void * p_context) // Aim for around 1ms
 
     if( g_PRE == true )
     {
-#if USE_NADC
         NADC_proc(NADC_action_WIDTH_TIMER);
-#else
-        adc_proc_PRE(ADC_PROC_TIMER_TICK_TWO);
-#endif
         if( g_PRE == false )
         { 
             // _PRE_advertising
@@ -304,11 +292,7 @@ static void adcOn_timeout_handler(void * p_context) // Aim for around 1ms
     }
     else
     {    
-#if USE_NADC
         NADC_proc(NADC_action_WIDTH_TIMER);
-#else
-        adc_proc(ADC_PROC_TIMER_TICK_TWO);
-#endif
     }        
 }
 
@@ -316,49 +300,49 @@ static void adcOn_timeout_handler(void * p_context) // Aim for around 1ms
 //static uint32_t m_app_ticks_per_100ms;
 //#define BSP_MS_TO_TICK(MS) (m_app_ticks_per_100ms * (MS / 100))
 
-uint32_t adcOn_timer_init(void)
+uint32_t battLoad_timer_init(void)
 {
     uint32_t err_code;
 
     // Create timer
-    err_code = app_timer_create(&m_adcOn_timer_id, APP_TIMER_MODE_SINGLE_SHOT, adcOn_timeout_handler);
+    err_code = app_timer_create(&m_battLoad_timer_id, APP_TIMER_MODE_SINGLE_SHOT, battLoad_timeout_handler);
     if( err_code != NRF_SUCCESS )
     {
-        sdoTE("\r\nadcOn: app_timer_create NG");
+        sdoTE("\r\nbattLoad: app_timer_create NG");
     }
     //APP_ERROR_CHECK(err_code);
     return(err_code);
 }
 
 
-uint32_t adcOn_timer_start(uint32_t timeout_ticks)
+uint32_t battLoad_timer_start(uint32_t timeout_ticks)
 {
     uint32_t err_code;
 
-    //err_code = app_timer_stop(m_adcOn_timer_id);
+    //err_code = app_timer_stop(m_battLoad_timer_id);
     //if( err_code != NRF_SUCCESS )
     //{
-    //    sdoTE("\r\nadcOn: app_timer_stop NG");
+    //    sdoTE("\r\nbattLoad: app_timer_stop NG");
     //}
     // Start timer - Note: ignored if already started (freeRTOS)
-    //err_code = app_timer_start(m_adcOn_timer_id, BSP_MS_TO_TICK(timeout_ticks), NULL);
-    err_code = app_timer_start(m_adcOn_timer_id, timeout_ticks, NULL);
+    //err_code = app_timer_start(m_battLoad_timer_id, BSP_MS_TO_TICK(timeout_ticks), NULL);
+    err_code = app_timer_start(m_battLoad_timer_id, timeout_ticks, NULL);
     if( err_code != NRF_SUCCESS )
     {
-        sdoTE("\r\nadcOn: app_timer_start NG");
+        sdoTE("\r\nbattLoad: app_timer_start NG");
     }
     //APP_ERROR_CHECK(err_code);
     return(err_code);
 }
 
-uint32_t adcOn_timer_stop(void)
+uint32_t battLoad_timer_stop(void)
 {
     uint32_t err_code;
     // Stop timer
-    err_code = app_timer_stop(m_adcOn_timer_id);
+    err_code = app_timer_stop(m_battLoad_timer_id);
     if( err_code != NRF_SUCCESS )
     {
-        sdoTE("\r\nadcOn: app_timer_stop NG");
+        sdoTE("\r\nbattLoad: app_timer_stop NG");
     }
     //APP_ERROR_CHECK(err_code);
     return(err_code);

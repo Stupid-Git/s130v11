@@ -1,8 +1,16 @@
 
 #include "myapp.h"
-#include "block_proc.h"
-#include "block_up.h"
-#include "app_tuds.h"
+
+//#include "block_proc.h"
+void BlkDn_unlockStateMachine(void);
+extern  uint8_t m_blkDn_buf[];
+extern  uint16_t m_blkDn_len;
+
+//#include "block_up.h"
+void BlkUp_Go( uint8_t *pkt, uint16_t len);
+
+
+//#include "app_tuds.h"
 
 
 //-----------------------------------------------------------------------------
@@ -46,14 +54,6 @@ int make_req_BLE( be_t *be_Req )
     {
         be_Req->buffer[i] = m_blkDn_buf[i];
     }
-    
-    //be_BU.rdPtr = 0;
-    //be_BU.wrPtr = m_blkDn_len - 2;
-    //be_BU.length = m_blkDn_len - 2;
-    //for( i=0 ; i<be_BU.length; i++)
-    //{
-    //    be_BU.buffer[i] = m_blkDn_buf[i];
-    //}
     return(0);
 }
 

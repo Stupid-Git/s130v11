@@ -58,9 +58,9 @@ uint32_t ma_holdoff_timer_start(uint32_t timeout_ticks);
 uint32_t ma_holdoff_timer_stop(void);
 
 #if USE_ADCON_TIMER
-uint32_t adcOn_timer_init(void);
-uint32_t adcOn_timer_start(uint32_t timeout_ticks);
-uint32_t adcOn_timer_stop(void);
+uint32_t battLoad_timer_init(void);
+uint32_t battLoad_timer_start(uint32_t timeout_ticks);
+uint32_t battLoad_timer_stop(void);
 #endif
 
 uint32_t GP_timer_init(void);

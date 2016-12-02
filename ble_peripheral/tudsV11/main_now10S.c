@@ -326,7 +326,7 @@ static void timers_init()
 {
     GP_timer_init();         // Init the General Purpose 1-tick per second timer
 #if USE_ADCON_TIMER
-    adcOn_timer_init();      // Init the on-shot timer for Battery Load timer (for reading the ADC)
+    battLoad_timer_init();      // Init the on-shot timer for Battery Load timer (for reading the ADC)
 #endif
     ma_uart_timer_init();    // Init the timer for Uart RxTimeout/Shutdown timing
     ma_holdoff_timer_init(); // Init the ... what is THIS timer ?!?
@@ -1613,12 +1613,7 @@ int main_tuds(void)
 	//SAS  err_code = sd_power_mode_set(power_mode);
 
 
-#if USE_NADC
     NADC_proc( NADC_action_RESET);
-#else
-    adc_proc_PRE(ADC_PROC_INIT_TRIGGER);
-    adc_proc(ADC_PROC_INIT_TRIGGER);
-#endif
     bln_proc(BLN_PROC_INIT_TRIGGER);
     blp_proc(BLP_PROC_INIT_TRIGGER);
     
