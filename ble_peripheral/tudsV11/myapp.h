@@ -216,7 +216,6 @@ void uart_thread(void * arg);
 
 #include "ma_timers.h"
 #include "app_tuds.h"
-#include "u_proc0x01.h"
 
 
 void ma_adc_config(void);

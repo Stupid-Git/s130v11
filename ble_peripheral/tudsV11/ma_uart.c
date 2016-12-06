@@ -3,8 +3,7 @@
 #include "myapp.h"
 
 
-
-uint16_t get_checksum(uint8_t *buf, uint16_t rp, uint16_t wp ) //uint16_t crc16_compute(uint8_t * p_data, uint16_t size, uint16_t * p_crc)
+/*uint16_t get_checksum(uint8_t *buf, uint16_t rp, uint16_t wp ) //uint16_t crc16_compute(uint8_t * p_data, uint16_t size, uint16_t * p_crc)
 {
     uint16_t cs = 0;
     uint16_t idx;
@@ -13,14 +12,14 @@ uint16_t get_checksum(uint8_t *buf, uint16_t rp, uint16_t wp ) //uint16_t crc16_
         cs += buf[idx];        
     return(cs);
 }
-
+*/
 //-----------------------------------------------------------------------------
 // returns :  1 - Complete
 //            0 - Not complete
 //           -1 - Packet type error
 //           -2 - CheckSum error
 //-----------------------------------------------------------------------------
-int32_t  proc01_checkPacketComplete(uint8_t *buf, uint16_t rp, uint16_t wp )
+static int32_t  proc01_checkPacketComplete(uint8_t *buf, uint16_t rp, uint16_t wp )
 {
     int16_t size;
     uint16_t crc;
