@@ -1,12 +1,10 @@
 
 #include "myapp.h"
 
-//#include "block_proc.h"
 void BlkDn_unlockStateMachine(void);
 extern  uint8_t m_blkDn_buf[];
 extern  uint16_t m_blkDn_len;
 
-//#include "block_up.h"
 void BlkUp_Go( uint8_t *pkt, uint16_t len);
 
 

@@ -110,7 +110,6 @@ static int32_t blk_up_set( uint8_t *pkt, uint16_t len)
     cs = 0;
     for(i=0 ; i < len; i++)
         cs = cs + pkt[i];
-    //cs = get_checksum(pkt, 0, len);
 #endif   
     m_blkUp_chkSumLSB = (uint8_t)((cs>>0) & 0x00FF);
     m_blkUp_chkSumMSB = (uint8_t)((cs>>8) & 0x00FF);
