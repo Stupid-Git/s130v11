@@ -12,6 +12,14 @@ ble_peripheral/ud2V11
 ble_peripheral/fudsV11
 
 
+# peripheral/radio_test
+peripheral/radio_test/hex
+
+peripheral/radio_test/pca10028/arm4
+peripheral/radio_test/pca10028/armgcc
+peripheral/radio_test/pca10028/iar
+peripheral/radio_test/pca10028/arm5_no_packs/_build
+
 # dfu/bootloader
 dfu/bootloader/pca10036/
 dfu/bootloader/pca10040/
