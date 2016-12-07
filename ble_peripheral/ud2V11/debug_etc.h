@@ -17,7 +17,8 @@ extern "C"
 // http://www.cplusplus.com/reference/cstdio/vprintf/
 
 
-#define  USE_PRINTF_OVER_SDO  0//1   
+#define  USE_PRINTF_OVER_SDO  0//1
+    
     
 
 //------------------------- NO Debug -------------------------
@@ -52,4 +53,3 @@ const char * get_ble_evt_str( uint8_t evt_id);
 #endif
 
 #endif // __DEBUG_ETC_H
-

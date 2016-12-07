@@ -5,21 +5,31 @@ ble_peripheral/tudsV11/config/TBR*
 ble_peripheral/tudsV11/hex
 ble_peripheral/tudsV11/pca10028/s130
 ble_peripheral/tudsV11/pca10028/s130_with_dfu/arm5_no_packs/_build
-ble_peripheral/tudsV11/pca10028/s130_with_dfu/arm5_no_packs/*.karel
-
-
-#----- ble_peripheral/ud2V11 --------------------
-ble_peripheral/ud2V11
+#ble_peripheral/tudsV11/pca10028/s130_with_dfu/arm5_no_packs/*.karel
 
 
 #----- ble_peripheral/fudsV11 --------------------
-ble_peripheral/fudsV11
+#ble_peripheral/fudsV11
+ble_peripheral/fudsV11/config/TBR*
+ble_peripheral/fudsV11/hex
+ble_peripheral/fudsV11/pca10028/s130
+ble_peripheral/fudsV11/pca10028/s130_with_dfu/arm5_no_packs/_build
+#ble_peripheral/fudsV11/pca10028/s130_with_dfu/arm5_no_packs/*.karel
+
+
+#----- ble_peripheral/ud2V11 --------------------
+#ble_peripheral/ud2V11
+ble_peripheral/ud2V11/config/TBR*
+ble_peripheral/ud2V11/hex
+ble_peripheral/ud2V11/pca10028/s130
+ble_peripheral/ud2V11/pca10028/s130_with_dfu/arm5_no_packs/_build
+#ble_peripheral/ud2V11/pca10028/s130_with_dfu/arm5_no_packs/*.karel
 
 
 #----- peripheral/radio_test --------------------
 peripheral/radio_test/hex
 peripheral/radio_test/pca10028/arm5_no_packs/_build
-peripheral/radio_test/pca10028/arm5_no_packs/*.karel
+#peripheral/radio_test/pca10028/arm5_no_packs/*.karel
 
 
 #----- dfu/bootloader
@@ -31,7 +41,7 @@ dfu/bootloader/config/TBR*
 dfu/bootloader/hex
 
 dfu/bootloader/pca10028/dual_bank_ble_s130/arm5_no_packs/_build
-dfu/bootloader/pca10028/dual_bank_ble_s130/arm5_no_packs/*.karel
+#dfu/bootloader/pca10028/dual_bank_ble_s130/arm5_no_packs/*.karel
 
 #----- nrfutil
 nrfutil/*.zip

@@ -13,6 +13,8 @@
 
   <project>
     <PathAndName>.\ble_peripheral\tudsV11\pca10028\s130_with_dfu\arm5_no_packs\tudsv11_s130_with_dfu_pca10028.uvprojx</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
+    <NodeIsExpanded>1</NodeIsExpanded>
   </project>
 
   <project>
@@ -29,7 +31,6 @@
 
   <project>
     <PathAndName>.\peripheral\radio_test\pca10028\arm5_no_packs\radio_test_pca10028.uvprojx</PathAndName>
-    <NodeIsActive>1</NodeIsActive>
   </project>
 
 </ProjectWorkspace>
