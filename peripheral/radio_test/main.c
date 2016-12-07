@@ -398,7 +398,7 @@ int main(void)
         printf("RF Test\r\n");
     }
     karel */    
-    int r;
+    //int r;
     NVIC_EnableIRQ(TIMER0_IRQn);
     __enable_irq();
     while (true)

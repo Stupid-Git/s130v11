@@ -2540,11 +2540,6 @@
               <FilePath>..\..\..\ma_uart.c</FilePath>
             </File>
             <File>
-              <FileName>u_proc0x01.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\u_proc0x01.c</FilePath>
-            </File>
-            <File>
               <FileName>priority_scheduler.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\priority_scheduler.c</FilePath>
@@ -5028,11 +5023,6 @@
               <FileName>ma_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\ma_uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>u_proc0x01.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\u_proc0x01.c</FilePath>
             </File>
             <File>
               <FileName>priority_scheduler.c</FileName>
@@ -7863,11 +7853,6 @@
               <FileName>ma_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\ma_uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>u_proc0x01.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\u_proc0x01.c</FilePath>
             </File>
             <File>
               <FileName>priority_scheduler.c</FileName>
