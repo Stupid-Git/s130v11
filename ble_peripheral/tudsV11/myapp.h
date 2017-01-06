@@ -32,8 +32,11 @@ extern "C"
 #include "bsp.h"
 #include "bsp_btn_ble.h"
 
-#define FIRMWARE_REV_LSB  0x91  // 2016/12/09  Release/Tag TUDS_V0.91
-#define FIRMWARE_REV_MSB  0x00 // e.g. 0x0100 -> Version 1.00
+//#define FIRMWARE_REV_LSB  0x91  // 2016/12/09  Release/Tag TUDS_V0.91
+//#define FIRMWARE_REV_MSB  0x00 // e.g. 0x0100 -> Version 1.00
+
+#define FIRMWARE_REV_LSB  0x00  // 2017/01/06  Release/Tag TUDS_V1.00
+#define FIRMWARE_REV_MSB  0x01  // e.g. 0x0100 -> Version 1.00
 
 //---------------------------------------------------------
 #define  USE_SDK_V11 1
