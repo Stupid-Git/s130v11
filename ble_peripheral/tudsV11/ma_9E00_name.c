@@ -125,6 +125,7 @@ int proc_rsp_BLN( be_t *be_Req,  be_t *be_Rsp )
     //int i;
 
     dbgPrint("\r\nproc_rsp_BLN_00");
+    bool bShortenedNameDidChange = false;  //Change 2017/01/12
 
     //be->buffer[5..8] toroku code (4Bytes)
     
@@ -142,10 +143,12 @@ int proc_rsp_BLN( be_t *be_Req,  be_t *be_Rsp )
     {
         mg_ShortenedName_rsp26_set( (char*)&be_Rsp->buffer[9] );
         gap_device_name_only_set((char*)mg_ShortenedName_rsp26);
+        bShortenedNameDidChange = true;
     }
     
     
-    if( mg_ManufacturerSpecific_rsp26_IsUpdated(be_Rsp->buffer) == true)
+    //if(mg_ManufacturerSpecific_rsp26_IsUpdated(be_Rsp->buffer) == true)  //Change 2017/01/12
+    if( (mg_ManufacturerSpecific_rsp26_IsUpdated(be_Rsp->buffer) == true) || (bShortenedNameDidChange == true) )  //Change 2017/01/12
     {
         advertising_init_mg_new(mg_6_advX50ms_inTicks);  // This is called to set new mg_ManufacturerSpecific_rsp26, (mg_ShortenedName_rsp26,)
     }
