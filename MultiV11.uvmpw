@@ -9,6 +9,7 @@
 
   <project>
     <PathAndName>.\ble_peripheral\ble_app_hrs\pca10028\s130_with_dfu\arm5_no_packs\ble_app_hrs_s130_with_dfu_pca10028.uvprojx</PathAndName>
+    <NodeIsExpanded>1</NodeIsExpanded>
   </project>
 
   <project>
@@ -31,7 +32,6 @@
 
   <project>
     <PathAndName>.\peripheral\radio_test\pca10028\arm5_no_packs\radio_test_pca10028.uvprojx</PathAndName>
-    <NodeIsExpanded>1</NodeIsExpanded>
   </project>
 
 </ProjectWorkspace>
