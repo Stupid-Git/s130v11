@@ -4,6 +4,7 @@
 #include "nrf_adc.h"
 
 #include "myapp.h"
+#include "tudsapp_config.h"
 
 #include "ma_timers.h" // for APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE,   #define OSTIMER_WAIT_FOR_QUEUE               2                                          /**< Number of ticks to wait for the timer queue to be ready */
 #include "ma_adc.h"
@@ -188,6 +189,7 @@ static void GP_timeout_handler(void * p_context) // Effectively a 1 Second timer
 
     autoTimeout_onTick();
 
+#if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
     if( g_PRE == true )
     {
         NADC_proc( NADC_action_ONE_SECOND);
@@ -206,6 +208,10 @@ static void GP_timeout_handler(void * p_context) // Effectively a 1 Second timer
         blp_proc(BLP_PROC_TIMER_TICK);
         bln_proc(BLN_PROC_TIMER_TICK);
     }        
+#else //APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    blp_proc(BLP_PROC_TIMER_TICK);
+    bln_proc(BLN_PROC_TIMER_TICK);
+#endif //APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 
@@ -260,94 +266,6 @@ uint32_t GP_timer_stop(void)
     return(err_code);
 }
 
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-void autoTimeout_onTick(void);
-#if USE_ADCON_TIMER
-APP_TIMER_DEF(m_battLoad_timer_id);
-
-static void battLoad_timeout_handler(void * p_context) // Aim for around 1ms
-{
-    UNUSED_PARAMETER(p_context);
-    uint32_t err_code;    
-
-    dbgPrint("$");
-
-    if( g_PRE == true )
-    {
-        NADC_proc(NADC_action_WIDTH_TIMER);
-        if( g_PRE == false )
-        { 
-            // _PRE_advertising
-            err_code = ble_advertising_start(BLE_ADV_MODE_FAST);                  //$$ 10 !!!!
-            dbgPrint("\r\n[6]");
-            APP_ERROR_CHECK(err_code);
-            dbgPrint("\r\n[14]");
-        }
-    }
-    else
-    {    
-        NADC_proc(NADC_action_WIDTH_TIMER);
-    }        
-}
-
-
-//static uint32_t m_app_ticks_per_100ms;
-//#define BSP_MS_TO_TICK(MS) (m_app_ticks_per_100ms * (MS / 100))
-
-uint32_t battLoad_timer_init(void)
-{
-    uint32_t err_code;
-
-    // Create timer
-    err_code = app_timer_create(&m_battLoad_timer_id, APP_TIMER_MODE_SINGLE_SHOT, battLoad_timeout_handler);
-    if( err_code != NRF_SUCCESS )
-    {
-        sdoTE("\r\nbattLoad: app_timer_create NG");
-    }
-    //APP_ERROR_CHECK(err_code);
-    return(err_code);
-}
-
-
-uint32_t battLoad_timer_start(uint32_t timeout_ticks)
-{
-    uint32_t err_code;
-
-    //err_code = app_timer_stop(m_battLoad_timer_id);
-    //if( err_code != NRF_SUCCESS )
-    //{
-    //    sdoTE("\r\nbattLoad: app_timer_stop NG");
-    //}
-    // Start timer - Note: ignored if already started (freeRTOS)
-    //err_code = app_timer_start(m_battLoad_timer_id, BSP_MS_TO_TICK(timeout_ticks), NULL);
-    err_code = app_timer_start(m_battLoad_timer_id, timeout_ticks, NULL);
-    if( err_code != NRF_SUCCESS )
-    {
-        sdoTE("\r\nbattLoad: app_timer_start NG");
-    }
-    //APP_ERROR_CHECK(err_code);
-    return(err_code);
-}
-
-uint32_t battLoad_timer_stop(void)
-{
-    uint32_t err_code;
-    // Stop timer
-    err_code = app_timer_stop(m_battLoad_timer_id);
-    if( err_code != NRF_SUCCESS )
-    {
-        sdoTE("\r\nbattLoad: app_timer_stop NG");
-    }
-    //APP_ERROR_CHECK(err_code);
-    return(err_code);
-}
-#endif
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

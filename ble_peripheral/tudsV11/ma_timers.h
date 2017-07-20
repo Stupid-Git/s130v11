@@ -32,6 +32,7 @@ extern "C"
 #include "bsp_btn_ble.h"
 
 
+#include "tudsapp_config.h"
 
 
 
@@ -57,11 +58,13 @@ uint32_t ma_holdoff_timer_init(void);
 uint32_t ma_holdoff_timer_start(uint32_t timeout_ticks);
 uint32_t ma_holdoff_timer_stop(void);
 
+#if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #if USE_ADCON_TIMER
 uint32_t battLoad_timer_init(void);
 uint32_t battLoad_timer_start(uint32_t timeout_ticks);
 uint32_t battLoad_timer_stop(void);
 #endif
+#endif // APP_TD_BATT_ENABLED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 uint32_t GP_timer_init(void);
 uint32_t GP_timer_start(uint32_t timeout_ticks);

@@ -1,9 +1,111 @@
 
 #include "myapp.h" // #include "nrf_soc.h" -> NRF_APP_PRIORITY_HIGH
+
+#include "tudsapp_config.h"
+
 #include "nrf_adc.h"
 #include "nrf_delay.h"
 
 #include "ma_adc.h"
+
+#if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+void sdoTE( char * S);
+//{
+////    dbgPrint( S );
+////    vTaskDelay( 42);
+//}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#if USE_ADCON_TIMER
+APP_TIMER_DEF(m_battLoad_timer_id);
+
+static void battLoad_timeout_handler(void * p_context) // Aim for around 1ms
+{
+    UNUSED_PARAMETER(p_context);
+    uint32_t err_code;    
+
+    dbgPrint("$");
+
+    if( g_PRE == true )
+    {
+        NADC_proc(NADC_action_WIDTH_TIMER);
+        if( g_PRE == false )
+        { 
+            // _PRE_advertising
+            err_code = ble_advertising_start(BLE_ADV_MODE_FAST);                  //$$ 10 !!!!
+            dbgPrint("\r\n[6]");
+            APP_ERROR_CHECK(err_code);
+            dbgPrint("\r\n[14]");
+        }
+    }
+    else
+    {    
+        NADC_proc(NADC_action_WIDTH_TIMER);
+    }        
+}
+
+
+//static uint32_t m_app_ticks_per_100ms;
+//#define BSP_MS_TO_TICK(MS) (m_app_ticks_per_100ms * (MS / 100))
+
+uint32_t battLoad_timer_init(void)
+{
+    uint32_t err_code;
+
+    // Create timer
+    err_code = app_timer_create(&m_battLoad_timer_id, APP_TIMER_MODE_SINGLE_SHOT, battLoad_timeout_handler);
+    if( err_code != NRF_SUCCESS )
+    {
+        sdoTE("\r\nbattLoad: app_timer_create NG");
+    }
+    //APP_ERROR_CHECK(err_code);
+    return(err_code);
+}
+
+
+uint32_t battLoad_timer_start(uint32_t timeout_ticks)
+{
+    uint32_t err_code;
+
+    //err_code = app_timer_stop(m_battLoad_timer_id);
+    //if( err_code != NRF_SUCCESS )
+    //{
+    //    sdoTE("\r\nbattLoad: app_timer_stop NG");
+    //}
+    // Start timer - Note: ignored if already started (freeRTOS)
+    //err_code = app_timer_start(m_battLoad_timer_id, BSP_MS_TO_TICK(timeout_ticks), NULL);
+    err_code = app_timer_start(m_battLoad_timer_id, timeout_ticks, NULL);
+    if( err_code != NRF_SUCCESS )
+    {
+        sdoTE("\r\nbattLoad: app_timer_start NG");
+    }
+    //APP_ERROR_CHECK(err_code);
+    return(err_code);
+}
+
+uint32_t battLoad_timer_stop(void)
+{
+    uint32_t err_code;
+    // Stop timer
+    err_code = app_timer_stop(m_battLoad_timer_id);
+    if( err_code != NRF_SUCCESS )
+    {
+        sdoTE("\r\nbattLoad: app_timer_stop NG");
+    }
+    //APP_ERROR_CHECK(err_code);
+    return(err_code);
+}
+
+#endif
+
+
+
+
 
 
 volatile int32_t adc_sample;
@@ -56,6 +158,7 @@ void ma_adc_config(void)
     NVIC_EnableIRQ(ADC_IRQn);
    
 }
+
 /*
     See also Zip file attached to
         https://devzone.nordicsemi.com/question/1771/high-sample-rate-with-adc-and-softdevice/
@@ -70,7 +173,6 @@ void ADC_IRQHandler(void)
 
     NADC_proc(NADC_action_ADC_DONE);
 }
-
 
 
 static uint16_t batVoltage78;
@@ -507,3 +609,15 @@ int make_req_ADC( be_t *be_Req )
     return(0);
 }
 
+#endif // APP_TD_BATT_ENABLED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+//.\_build\tuds_s130_dfu2.axf: Error: L6218E: Undefined symbol battLoad_timer_init (referred from main_now10s.o).
+
+//.\_build\tuds_s130_dfu2.axf: Error: L6218E: Undefined symbol NADC_mode (referred from ma_9e01_params.o).
+//.\_build\tuds_s130_dfu2.axf: Error: L6218E: Undefined symbol NADC_proc (referred from ma_9e01_params.o).
+//.\_build\tuds_s130_dfu2.axf: Error: L6218E: Undefined symbol NADC_set_ADC_L_GO (referred from ma_9e01_params.o).
+
+//.\_build\tuds_s130_dfu2.axf: Error: L6218E: Undefined symbol make_req_ADC (referred from ss_thread.o).
+//.\_build\tuds_s130_dfu2.axf: Error: L6218E: Undefined symbol proc_rsp_ADC (referred from ss_thread.o).
+//.\_build\tuds_s130_dfu2.axf: Error: L6218E: Undefined symbol proc_timeout_ADC (referred from ss_thread.o).

@@ -1,5 +1,6 @@
 
 #include "myapp.h"
+#include "tudsapp_config.h"
 
 
 //-----------------------------------------------------------------------------
@@ -545,6 +546,7 @@ static void SS_thread_process_event(uniEvent_t *pEvt)
         core_thread_QueueSend( &LEvt );
         break;
 
+#if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     //----- Triggers ----- core_ADC -----
     case evt_core_ADC_trigger: //dbgPrint("\r\nevt_core_ADC_trigger");
 
@@ -563,6 +565,7 @@ static void SS_thread_process_event(uniEvent_t *pEvt)
         LEvt.evtType = evt_SSQ_Check_Queue;
         core_thread_QueueSend( &LEvt );
         break;
+#endif // APP_TD_BATT_ENABLED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 
 
     //----- Triggers ----- core_BLN -----

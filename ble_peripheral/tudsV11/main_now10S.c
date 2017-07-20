@@ -15,6 +15,9 @@
 
 
 #include "myapp.h" 
+#include "tudsapp_config.h"
+
+#include "ma_stopline.h"
 #include "ma_adc.h"
 
 
@@ -325,9 +328,11 @@ uint32_t P8_timer_init(void);
 static void timers_init()
 {
     GP_timer_init();         // Init the General Purpose 1-tick per second timer
+#if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #if USE_ADCON_TIMER
     battLoad_timer_init();      // Init the on-shot timer for Battery Load timer (for reading the ADC)
 #endif
+#endif // APP_TD_BATT_ENABLED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ma_uart_timer_init();    // Init the timer for Uart RxTimeout/Shutdown timing
     ma_holdoff_timer_init(); // Init the ... what is THIS timer ?!?
     
@@ -1541,6 +1546,10 @@ void pinsTUG_25_Invert(void);
 
 //debug uint32_t DUMB_counterA = 0;
 
+void stopline_callback(uint32_t value)
+{
+}
+
 int main_tuds(void)
 {
     bool erase_bonds;
@@ -1570,7 +1579,14 @@ int main_tuds(void)
     dbgPrint("\r\n");
 #endif
         
-	ma_adc_config();
+
+#if APP_TD_STOPLINE_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ma_stopline_init(stopline_callback);
+#endif //APP_TD_STOPLINE_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ma_adc_config();
+#endif //APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
 
     timers_pre_init();
     timers_init();
@@ -1611,9 +1627,9 @@ int main_tuds(void)
 	//  NRF_POWER_MODE_LOWPWR     // Low power mode. See power management in the reference manual. 
     //SAS  nrf_power_mode_t power_mode = NRF_POWER_MODE_LOWPWR;
 	//SAS  err_code = sd_power_mode_set(power_mode);
-
-
+#if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     NADC_proc( NADC_action_RESET);
+#endif //APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
     bln_proc(BLN_PROC_INIT_TRIGGER);
     blp_proc(BLP_PROC_INIT_TRIGGER);
     

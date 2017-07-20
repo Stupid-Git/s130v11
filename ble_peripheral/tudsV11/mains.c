@@ -1,4 +1,6 @@
 
+#include "tudsApp_config.h"
+
 
 int main_empty(void)
 {

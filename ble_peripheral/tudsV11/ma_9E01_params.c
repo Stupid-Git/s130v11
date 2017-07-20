@@ -4,6 +4,7 @@
 #include "string.h"
 
 #include "myapp.h"
+#include "tudsapp_config.h"
 
 #include "ma_adc.h"
 
@@ -116,7 +117,7 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
 #endif
 
     
-
+#if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if(NADC_mode == NADC_mode_VCHECK)
     {
         //if ( (mg_12_9E00_rate == 0) && (mg_9_ADC_rate == 0))
@@ -129,6 +130,7 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
             NADC_mode = NADC_mode_FORCE_1; // FORCE TWO ADC READINGS BEFORE going to NADC_mode_NORMAL
         }
     }
+#endif // APP_TD_BATT_ENABLED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //-----------------------------------------------------------------------------    
 //-----------------------------------------------------------------------------    
 
@@ -241,7 +243,7 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
         bln_proc(BLN_PROC_FORCE_TRIGGER);
     }
 
-
+#if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if( NADC_mode == NADC_mode_FORCE_1 )
     {
         NADC_set_ADC_L_GO();
@@ -253,6 +255,7 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
         //reset counters
         //cnt_9 = 0; //Hammer see fix called Hammer
     }
+#endif // APP_TD_BATT_ENABLED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     return(0);
 }

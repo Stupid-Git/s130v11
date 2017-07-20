@@ -17,7 +17,7 @@ extern "C"
 // http://www.cplusplus.com/reference/cstdio/vprintf/
 
 
-#define  USE_PRINTF_OVER_SDO  0//1   
+#define  USE_PRINTF_OVER_SDO  1//1   
     
 
 //------------------------- NO Debug -------------------------
