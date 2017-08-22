@@ -1546,9 +1546,39 @@ void pinsTUG_25_Invert(void);
 
 //debug uint32_t DUMB_counterA = 0;
 
-void stopline_callback(uint32_t value)
+
+
+// STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
+// STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
+// STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
+static void stopline_sleep_mode_enter(void)
 {
+    uint32_t err_code;
+    //err_code = bsp_indication_set(BSP_INDICATE_IDLE);
+    //APP_ERROR_CHECK(err_code);
+
+    // Prepare wakeup buttons.
+    //err_code = bsp_btn_ble_sleep_mode_prepare();
+    err_code = ma_stopline_wakeup_line_set();
+    APP_ERROR_CHECK(err_code);
+
+    // Go to system-off mode (this function will not return; wakeup will cause a reset).
+    err_code = sd_power_system_off();
+    APP_ERROR_CHECK(err_code);
 }
+void stopline_callback(uint32_t value)
+{    
+    dbgPrintf("\r\n STOPLINE value = %d\r\n", value);
+    
+    if( value == 0)
+    {
+        stopline_sleep_mode_enter();
+    }
+}
+// STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
+// STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
+// STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
+
 
 int main_tuds(void)
 {
@@ -1561,6 +1591,7 @@ int main_tuds(void)
     
     dbgPrint_Init();     // karel - debug via spi-master SDO
 #if USE_PRINTF_OVER_SDO
+//while(1){//GJHJHGJHGHJGHJGHJGHJGHJGJHGHJGHJGJHGHJG
     nrf_delay_ms(500);
     dbgPrint("1");
     nrf_delay_ms(500);
@@ -1577,6 +1608,7 @@ int main_tuds(void)
 //    dbgPrint("\r\nBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
     dbgPrint("\r\nCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
     dbgPrint("\r\n");
+//}//GJHJHGJHGHJGHJGHJGHJGHJGJHGHJGHJGJHGHJG
 #endif
         
 

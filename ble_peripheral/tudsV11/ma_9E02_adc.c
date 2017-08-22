@@ -144,6 +144,7 @@ static void BattPins_OFF(void)
 
 void ma_adc_config(void)
 {
+#if !APP_TD_BATT_FAKE_ADC
     const nrf_adc_config_t nrf_adc_config = NRF_ADC_CONFIG_DEFAULT;
 
     // Initialize and configure ADC
@@ -156,7 +157,8 @@ void ma_adc_config(void)
     NVIC_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_HIGH);
 #endif
     NVIC_EnableIRQ(ADC_IRQn);
-   
+
+#endif //!APP_TD_BATT_FAKE_ADC   
 }
 
 /*
@@ -164,7 +166,7 @@ void ma_adc_config(void)
         https://devzone.nordicsemi.com/question/1771/high-sample-rate-with-adc-and-softdevice/
 */
 
-
+#if !APP_TD_BATT_FAKE_ADC
 void ADC_IRQHandler(void)
 {
     nrf_adc_conversion_event_clean();
@@ -173,6 +175,7 @@ void ADC_IRQHandler(void)
 
     NADC_proc(NADC_action_ADC_DONE);
 }
+#endif //!APP_TD_BATT_FAKE_ADC
 
 
 static uint16_t batVoltage78;
@@ -428,18 +431,37 @@ int NADC_proc( eNADC_action action)
     {
         if( m_ADC_ENT_L.state == NADC_state_WIDTH_WAIT)
         {
+#if APP_TD_BATT_FAKE_ADC
+            adc_sample =  432; //401;
+          //m_ADC_ENT_L.state = NADC_state_DONE_ADC;
+            m_ADC_ENT_L.state = NADC_state_WAIT_ADC;
+            action = NADC_action_ADC_DONE;
+            dbgPrintf("\r\n [L] FAKE ADC \r\n");
+#else
             nrf_adc_start(); //START_ADC_CONVERSION()
             m_ADC_ENT_L.state = NADC_state_WAIT_ADC;
             return(0);
+#endif
         }
         else
         if( m_ADC_ENT_H.state == NADC_state_WIDTH_WAIT)
         {
+#if APP_TD_BATT_FAKE_ADC
+            adc_sample =  432; //401;
+          //m_ADC_ENT_H.state = NADC_state_DONE_ADC;
+            m_ADC_ENT_H.state = NADC_state_WAIT_ADC;
+            action = NADC_action_ADC_DONE;
+            dbgPrintf("\r\n [H] FAKE ADC \r\n");
+#else
             nrf_adc_start(); //START_ADC_CONVERSION()
             m_ADC_ENT_H.state = NADC_state_WAIT_ADC;
             return(0);
+#endif
         }
+#if APP_TD_BATT_FAKE_ADC
+#else
         return(0);
+#endif
     }
 
     if(action == NADC_action_ADC_DONE)

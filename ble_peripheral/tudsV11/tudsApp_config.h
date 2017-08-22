@@ -12,10 +12,15 @@
 // <h> app_ADC 
 //==========================================================
 // <q> APP_TD_BATT_ENABLED  - tdk_battMonService - Battery Monitoring Service
-
 #ifndef APP_TD_BATT_ENABLED
-#define APP_TD_BATT_ENABLED 0
+#define APP_TD_BATT_ENABLED 1
 #endif
+
+// <q> APP_TD_BATT_FAKE_ADC  - tdk_battMonService - Fake the ADC Result
+#ifndef APP_TD_BATT_FAKE_ADC
+#define APP_TD_BATT_FAKE_ADC 1
+#endif
+
 // </h> 
 
 //==========================================================
@@ -25,6 +30,14 @@
 
 #ifndef APP_TD_STOPLINE_ENABLED
 #define APP_TD_STOPLINE_ENABLED 1
+
+//==========================================================
+// <o> USE_BSP_BTN_AS_STOPLINE - Set to 1 to Use DK Button (instead of real signal (P.00)) 
+#ifndef USE_BSP_BTN_AS_STOPLINE
+#define USE_BSP_BTN_AS_STOPLINE 0
+#endif
+
+
 #endif
 // </h> 
 

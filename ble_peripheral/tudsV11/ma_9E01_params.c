@@ -76,6 +76,13 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
         WakePin_Release("\r\n WakePin_Release - proc_rsp_BLP");   //WakePin_Release();
     }
     
+#if !APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    be_Rsp->buffer[9] = 0;
+    be_Rsp->buffer[10] = 0;
+    mg_9_ADC_rate = 0;
+    mg_10_loadADC = 0;
+#endif // APP_TD_BATT_ENABLED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
     mg_5_dengen        = be_Rsp->buffer[5];
     mg_6_advX50ms      = be_Rsp->buffer[6];
     mg_7_wkUpPerX50ms  = be_Rsp->buffer[7];
@@ -84,7 +91,8 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
     mg_10_loadADC      = be_Rsp->buffer[10];
     mg_11_power        = (int8_t)be_Rsp->buffer[11];
     mg_12_9E00_rate    = be_Rsp->buffer[12];
-    
+
+
     if ((mg_12_9E00_rate == 0) && (mg_9_ADC_rate == 0))
     {
         blp_rate = 60;
@@ -130,6 +138,9 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
             NADC_mode = NADC_mode_FORCE_1; // FORCE TWO ADC READINGS BEFORE going to NADC_mode_NORMAL
         }
     }
+#else
+    mg_9_ADC_rate = 0;
+    mg_10_loadADC = 0;
 #endif // APP_TD_BATT_ENABLED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //-----------------------------------------------------------------------------    
 //-----------------------------------------------------------------------------    
@@ -296,7 +307,8 @@ void blp_proc(int param)
     }
     if(param == BLP_PROC_UNPARK)
     {
-        blp_sm = BLP_ENDED;
+      blp_sm = BLP_ENDED; //debug see next line & see "blp_rate = "
+      //blp_sm = BLP_BOOT; //debug see "blp_rate = "
         return;
     }
 

@@ -14,6 +14,8 @@ uint32_t ma_stopline_init(stopline_cb);
 uint32_t ma_stopline_deinit(void);
 uint32_t ma_stopline_value(void);
 
+uint32_t ma_stopline_wakeup_line_set(void);
+    
 #ifdef __cplusplus
 }
 #endif

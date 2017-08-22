@@ -115,15 +115,14 @@ static void ref_gpio_init(void)
 
 
 
-//#define STOPLINES_NUMBER 2
-//#define BUTTON_PULL    NRF_GPIO_PIN_PULLUP
 
 #define STOPLINE_PIN_00   0  //P0.00
-#define STOPLINE_TESTPIN  1  //P0.01
 
+#if USE_BSP_BTN_AS_STOPLINE
+#define STOPLINE_PIN   BSP_BUTTON_1
+#else
 #define STOPLINE_PIN   STOPLINE_PIN_00
-
-
+#endif
 
 
 uint32_t ma_stopline_event_enable(void)
@@ -185,17 +184,68 @@ uint32_t ma_stopline_init(stopline_cb _stopline_cb)
     err_code = nrf_drv_gpiote_init();
     APP_ERROR_CHECK(err_code);
 
-    nrf_drv_gpiote_in_config_t in_config = GPIOTE_CONFIG_IN_SENSE_TOGGLE(false);
+  //nrf_drv_gpiote_in_config_t in_config = GPIOTE_CONFIG_IN_SENSE_TOGGLE(false);
+    nrf_drv_gpiote_in_config_t in_config = GPIOTE_CONFIG_IN_SENSE_TOGGLE(true);
     in_config.pull = NRF_GPIO_PIN_PULLUP;
   
     err_code = nrf_drv_gpiote_in_init(STOPLINE_PIN, &in_config, gpiote_stopline_event_handler); //err_code = nrf_drv_gpiote_in_init(p_btn->pin_no, &config, gpiote_event_handler);
+  //err_code = nrf_drv_gpiote_in_init(PIN_IN,       &in_config, in_pin_handler);
+  //APP_ERROR_CHECK(err_code);
     VERIFY_SUCCESS(err_code);    
 
     nrf_drv_gpiote_in_event_enable(STOPLINE_PIN, true);
+  //nrf_drv_gpiote_in_event_enable(PIN_IN,       true);
 
     m_stopline_cb = _stopline_cb;
     return NRF_SUCCESS;
+
 }
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifdef BSP_BUTTON_0
+    #define PIN_IN BSP_BUTTON_0
+#endif
+#ifndef PIN_IN
+    #error "Please indicate input pin"
+#endif
+
+#ifdef BSP_LED_0
+    #define PIN_OUT BSP_LED_0
+#endif
+//#ifdef BSP_LED_1
+//    #define PIN_OUT BSP_LED_1
+//#endif
+#ifndef PIN_OUT
+    #error "Please indicate output pin"
+#endif
+
+void in_pin_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
+{
+    nrf_drv_gpiote_out_toggle(PIN_OUT);
+}
+static void gpio_init(void)
+{
+    ret_code_t err_code;
+
+    err_code = nrf_drv_gpiote_init();
+    APP_ERROR_CHECK(err_code);
+
+    nrf_drv_gpiote_out_config_t out_config = GPIOTE_CONFIG_OUT_SIMPLE(false);
+
+    err_code = nrf_drv_gpiote_out_init(PIN_OUT, &out_config);
+    APP_ERROR_CHECK(err_code);
+
+    nrf_drv_gpiote_in_config_t in_config = GPIOTE_CONFIG_IN_SENSE_TOGGLE(true);
+    in_config.pull = NRF_GPIO_PIN_PULLUP;
+
+    err_code = nrf_drv_gpiote_in_init(PIN_IN, &in_config, in_pin_handler);
+    APP_ERROR_CHECK(err_code);
+
+    nrf_drv_gpiote_in_event_enable(PIN_IN, true);
+}
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 uint32_t ma_stopline_deinit(void)
 {
@@ -218,5 +268,17 @@ uint32_t ma_stopline_value(void)
 //     NVIC_ClearPendingIRQ(GPIOTE_IRQn);
 //}
 
+uint32_t ma_stopline_wakeup_line_set(void)
+{
+    //uint32_t wakeup_buttons = 42;
+
+    uint32_t new_cnf = NRF_GPIO->PIN_CNF[STOPLINE_PIN];
+    uint32_t new_sense = GPIO_PIN_CNF_SENSE_High; //GPIO_PIN_CNF_SENSE_Low : GPIO_PIN_CNF_SENSE_Disabled;
+    new_cnf &= ~GPIO_PIN_CNF_SENSE_Msk;
+    new_cnf |= (new_sense << GPIO_PIN_CNF_SENSE_Pos);
+    NRF_GPIO->PIN_CNF[STOPLINE_PIN] = new_cnf;
+
+    return NRF_SUCCESS;
+}
 
 #endif //APP_TD_STOPLINE_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
