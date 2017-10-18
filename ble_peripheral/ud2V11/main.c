@@ -367,6 +367,8 @@ static void on_tx_complete(ble_nus_t * p_nus, ble_evt_t * p_ble_evt)
     
 }
 
+const char * get_ble_evt_str( uint8_t evt_id);
+
 void RX_next_ble_evt(ble_evt_t * p_ble_evt)
 {
   //dbgPrintf("\n\revt = %d,%x: ", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id);
@@ -669,7 +671,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 }
 
 
-
+/*moved to debug_etc.c
 const char * get_ble_evt_str( uint8_t evt_id)
 {
     const char * s = "Unknown";
@@ -677,13 +679,13 @@ const char * get_ble_evt_str( uint8_t evt_id)
     switch( evt_id )
     {
     // ble.h BLE_EVT_BASE = 0x01
-    case BLE_EVT_TX_COMPLETE:                          // 0x01 < Transmission Complete. @ref ble_evt_tx_complete_t */
+    case BLE_EVT_TX_COMPLETE:                          // 0x01 < Transmission Complete. @ref ble_evt_tx_complete_t 
         s = "BLE_EVT_TX_COMPLETE";
         break;
-    case BLE_EVT_USER_MEM_REQUEST:                     // 0x02 < User Memory request. @ref ble_evt_user_mem_request_t */
+    case BLE_EVT_USER_MEM_REQUEST:                     // 0x02 < User Memory request. @ref ble_evt_user_mem_request_t 
         s = "BLE_EVT_USER_MEM_REQUEST";
         break;
-    case BLE_EVT_USER_MEM_RELEASE:                     // 0x03 < User Memory release. @ref ble_evt_user_mem_release_t */
+    case BLE_EVT_USER_MEM_RELEASE:                     // 0x03 < User Memory release. @ref ble_evt_user_mem_release_t 
         s = "BLE_EVT_USER_MEM_RELEASE";
         break;
     
@@ -735,19 +737,19 @@ const char * get_ble_evt_str( uint8_t evt_id)
         break;
 
     // "ble_gatts.h" BLE_GATTS_EVT_BASE = 0x50
-    case BLE_GATTS_EVT_WRITE:                          // 0x50 < Write operation performed.                                           \n See @ref ble_gatts_evt_write_t.                 */
+    case BLE_GATTS_EVT_WRITE:                          // 0x50 < Write operation performed.                                           \n See @ref ble_gatts_evt_write_t.                 
         s = "BLE_GATTS_EVT_WRITE";
         break;
-    case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:           // 0x51 < Read/Write Authorization request.                                    \n Reply with @ref sd_ble_gatts_rw_authorize_reply. \n See @ref ble_gatts_evt_rw_authorize_request_t. */
+    case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:           // 0x51 < Read/Write Authorization request.                                    \n Reply with @ref sd_ble_gatts_rw_authorize_reply. \n See @ref ble_gatts_evt_rw_authorize_request_t. 
         s = "BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST";
         break;
-    case BLE_GATTS_EVT_SYS_ATTR_MISSING:               // 0x52 < A persistent system attribute access is pending.                     \n Respond with @ref sd_ble_gatts_sys_attr_set.     \n See @ref ble_gatts_evt_sys_attr_missing_t.     */
+    case BLE_GATTS_EVT_SYS_ATTR_MISSING:               // 0x52 < A persistent system attribute access is pending.                     \n Respond with @ref sd_ble_gatts_sys_attr_set.     \n See @ref ble_gatts_evt_sys_attr_missing_t.     
         s = " BLE_GATTS_EVT_SYS_ATTR_MISSING";
         break;
-    case BLE_GATTS_EVT_HVC:                            // 0x53 < Handle Value Confirmation.                                           \n See @ref ble_gatts_evt_hvc_t.                   */
+    case BLE_GATTS_EVT_HVC:                            // 0x53 < Handle Value Confirmation.                                           \n See @ref ble_gatts_evt_hvc_t.                   
         s = " BLE_GATTS_EVT_HVC";
         break;
-    case BLE_GATTS_EVT_SC_CONFIRM:                     // 0x54 < Service Changed Confirmation. No additional event structure applies.                                                    */
+    case BLE_GATTS_EVT_SC_CONFIRM:                     // 0x54 < Service Changed Confirmation. No additional event structure applies.                                                    
         s = " BLE_GATTS_EVT_SC_CONFIRM";
         break;
     case BLE_GATTS_EVT_TIMEOUT:                 
@@ -761,7 +763,7 @@ const char * get_ble_evt_str( uint8_t evt_id)
        
     return( s );
 }
-
+moved to debug_etc.c */
 
 /**@brief Function for dispatching a SoftDevice event to all modules with a SoftDevice 
  *        event handler.
@@ -1039,6 +1041,35 @@ uint32_t GP_timer_start(uint32_t timeout_ticks);
 #endif
 
 
+//==============================================================================
+//==============================================================================
+// this function call is to set the settings for "sd_ble_opt_set" for BLE_CONN_BW_LO,MID,HIGH etc
+// to see if the setting were too low by default and thus causing UP transfer to be throttled to 1packet per connection interval
+// It however appears that the default setting, is for the highest bandwidth
+void set_the_connection_bandwidth()
+{    
+    uint32_t err_code;
+    //uint32_t opt_id;
+    ble_opt_t ble_opt;
+    
+    memset(&ble_opt, 0x00, sizeof(ble_opt));
+    uint8_t conn_bw;
+    conn_bw = BLE_CONN_BW_NONE;
+    //conn_bw = BLE_CONN_BW_LOW;
+    //conn_bw = BLE_CONN_BW_MID;
+    //conn_bw = BLE_CONN_BW_HIGH;
+    
+    ble_opt.common_opt.conn_bw.conn_bw.conn_bw_tx = conn_bw; //< Connection bandwidth configuration for transmission, see @ref BLE_CONN_BWS.
+    ble_opt.common_opt.conn_bw.conn_bw.conn_bw_rx = conn_bw;  //< Connection bandwidth configuration for reception, see @ref BLE_CONN_BWS.
+    ble_opt.common_opt.conn_bw.role = BLE_GAP_ROLE_PERIPH; //BLE_GAP_ROLE_CENTRAL; //#define BLE_GAP_ROLE_CENTRAL     0x2     Central Role. 
+    err_code = sd_ble_opt_set(BLE_COMMON_OPT_CONN_BW, &ble_opt);
+    printf("err_code = 0x%x\r\n", err_code);
+}
+//==============================================================================
+//==============================================================================
+
+
+
 /**@brief Application main function.
  */
 int main(void)
@@ -1056,8 +1087,14 @@ int main(void)
     uart_init();
     buttons_leds_init(&erase_bonds);
 
+    
     ble_stack_init();
 
+// this function call is to set the settings for "sd_ble_opt_set" for BLE_CONN_BW_LO,MID<HIGH 
+//set_the_connection_bandwidth(); // this function call is to set the settings for "sd_ble_opt_set" for BLE_CONN_BW_LO,MID<HIGH
+// this function call is to set the settings for "sd_ble_opt_set" for BLE_CONN_BW_LO,MID<HIGH
+    
+    
 #if USE_APPSH
     scheduler_init();  // <> NOTE: KAREL Adjust Queue size etc as needed +++++++++++
     //TODOT priority_scheduler_init();  // <> NOTE: KAREL Adjust Queue size etc as needed +++++++++++

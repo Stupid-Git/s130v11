@@ -30,7 +30,8 @@ static inline int dbgPrintf( const char * format, ... )
 
 #define dbgPrint( X )
 #define dbgPrint_Init() 
-#define get_ble_evt_str(X) (const char *)""
+//always defined REF:rttprintf   #define get_ble_evt_str(X) (const char *)""
+const char * get_ble_evt_str( uint8_t evt_id);
     
 //------------------------- YES Debug -------------------------
 #else

@@ -129,6 +129,9 @@ static int32_t blk_up_set( uint8_t *pkt, uint16_t len)
         m_blkUp_chk[i] = 0x00;
     }
     
+//    printf("m_blkUp_len    = %d\r\n", m_blkUp_len);
+//    printf("m_blkUp_blkCnt = %d\r\n", m_blkUp_blkCnt);
+    
     return(0);
 }
 
@@ -387,6 +390,34 @@ static uint8_t ReList[17];
 static uint8_t ReList_wp;
 static uint8_t ReList_rp;
 
+typedef struct { int cnt; int CCr; uint32_t count;} tSB;
+static int SB_cnt = 0;
+static tSB SB_blk[100];
+void print_SB(void)
+{
+/**/
+    int i;
+    uint32_t delta;
+    printf("\n\r");
+    for(i=0;i<SB_cnt;i++) {
+        if( i>0 )
+            delta = SB_blk[i].count - SB_blk[i-1].count;
+        else
+            delta = 0;
+        printf("  CCr = %d,  SB_blk[%d] = %d,  count = %d, delta = %d\n\r", SB_blk[i].CCr, i, SB_blk[i].cnt, SB_blk[i].count, delta );
+    }
+    
+    uint32_t _d;
+    float _dt;
+    
+    _d = SB_blk[SB_cnt - 1].count - SB_blk[0].count;
+    _dt = _d * 1.0;
+    _dt = (_dt / 32768.0) * 1000.0;
+    
+    printf(" d = %d, dt = %f \r\n", _d, _dt);
+/**/
+}
+
 PUBLIC int32_t app_ud2_Ucfm_handler( app_ud2_t *p_app_ud2, uint8_t *buf, uint8_t len)
 {
     int32_t i;
@@ -394,7 +425,7 @@ PUBLIC int32_t app_ud2_Ucfm_handler( app_ud2_t *p_app_ud2, uint8_t *buf, uint8_t
     r = 0;
 
 
-    printf("\nUcfm");
+//  printf("\n\rUcfm");
 
     
     if( buf[0] == 1 )
@@ -403,6 +434,7 @@ PUBLIC int32_t app_ud2_Ucfm_handler( app_ud2_t *p_app_ud2, uint8_t *buf, uint8_t
         {
             printf(" S\n");
             dbgPrint("S");
+            print_SB();
             m_BlkUp_sm = eBlkUp_IDLE;
         }
 
@@ -410,21 +442,23 @@ PUBLIC int32_t app_ud2_Ucfm_handler( app_ud2_t *p_app_ud2, uint8_t *buf, uint8_t
         {
             printf(" N\n");
             dbgPrint("N");
+            print_SB();
             m_BlkUp_sm = eBlkUp_IDLE;
         }
 
         if( buf[1] == 2 ) // 1,2 Resend
         {
-            printf(" R\n");
+            //printf(" R\n");
 
             ReList_wp = 0;
             ReList_rp = 0;
             for( i = 0; i<buf[2]; i++)
             {
+                printf(" %d ", buf[3 + i]);
                 ReList[i] = buf[3 + i];
                 ReList_wp++;
             }
-
+            printf(" R\n");
             for( i = ReList_rp; i<ReList_wp; i++)
             {
                 m_blkUp_chk[ ReList[i] ] = 0; // set check as not been sent
@@ -462,12 +496,23 @@ PUBLIC int32_t app_ud2_OnWrittenComplete_Ucmd_handler(app_ud2_t *p_app_ud2,  uin
     
     return(r);
 }
-
 //-----------------------------------------------------------------------------
 // Callback for write done event
 //-----------------------------------------------------------------------------
+
+void doSetAnEventToFakeACallToThisAgain(void)
+{
+  m_BlkUp_sm = eBlkUp_DAT_SEND;
+  //BlkUp_timer_start(  20 ); //20 OK
+  //BlkUp_timer_start( 400 ); //400-> No "Cr"s but no pauses/blanks either
+  //BlkUp_timer_start( 200 ); //200-> 1 Cr at second event
+  //BlkUp_timer_start(  80 ); // 80-> Cr every 4~6 packets
+  //BlkUp_timer_start( 100 ); // 100-> same as 80
+}
+
+
 #define SAD_BURST 1
-PUBLIC int32_t app_ud2_OnWrittenComplete_Udat_handler(app_ud2_t *p_app_ud2,  uint8_t *buf, uint8_t len)
+PUBLIC int32_t app_ud2_OnWrittenComplete_Udat_handler(app_ud2_t *Xp_app_ud2,  uint8_t *Xbuf, uint8_t Xlen)
 {
     uint32_t err_code;
     int32_t r;
@@ -476,10 +521,24 @@ PUBLIC int32_t app_ud2_OnWrittenComplete_Udat_handler(app_ud2_t *p_app_ud2,  uin
     if( m_BlkUp_sm != eBlkUp_DAT_SEND)
         return(0);
 
-    //dbgPrint("C");
 
     if( m_BlkUp_sm == eBlkUp_DAT_SEND)    
     {
+/**/
+if(Xp_app_ud2==(app_ud2_t*)42)
+{
+    //printf("Cr");
+    SB_blk[SB_cnt].CCr = 1;
+} else {
+    //printf("C");
+    SB_blk[SB_cnt].CCr = 0;
+}
+/**/        
+//dbgPrint("C");
+SB_blk[SB_cnt].cnt = 0;
+SB_blk[SB_cnt].count = NRF_RTC0->COUNTER;
+
+
         BlkUp_timer_stop();
         m_BlkUp_sm = eBlkUp_DAT_SENT;
 #if SAD_BURST
@@ -498,8 +557,10 @@ PUBLIC int32_t app_ud2_OnWrittenComplete_Udat_handler(app_ud2_t *p_app_ud2,  uin
                     err_code = blk_up_startSend_Udat((uint8_t)(r)/*m_current_blk_No*/); // After tx_complete for Udat send
                     if( err_code != NRF_SUCCESS)
                     {
+                        doSetAnEventToFakeACallToThisAgain();
                         break;
                     }
+SB_blk[SB_cnt].cnt++;
                 }
                 else
                 {
@@ -537,6 +598,8 @@ PUBLIC int32_t app_ud2_OnWrittenComplete_Udat_handler(app_ud2_t *p_app_ud2,  uin
             }
             
         }
+        SB_cnt++;
+
 #else        
         blk_up_setSent(m_current_blk_No);
         r = blk_up_getNextBlkno(m_current_blk_No);
@@ -647,7 +710,8 @@ static void BlkUp_timeout_handler(void * p_context)
     else
     if(m_BlkUp_sm == eBlkUp_DAT_SEND) // we didn't get a write done
     {
-        blk_up_startSend_Udat(m_current_blk_No); // at timeout in eBlkUp_DAT_SEND state
+        app_ud2_OnWrittenComplete_Udat_handler((app_ud2_t*)42,0,0); // at timeout in eBlkUp_DAT_SEND state
+        //blk_up_startSend_Udat(m_current_blk_No); // at timeout in eBlkUp_DAT_SEND state
     }
     else
     if(m_BlkUp_sm == eBlkUp_DAT_SENT)
@@ -664,29 +728,81 @@ static void BlkUp_timeout_handler(void * p_context)
 //
 //  Triggers to start BlkUp process
 //
-//-----------------------------------------------------------------------------
+#include "ble.h"
+void ptec(uint32_t err_code)
+{
+    if( err_code == NRF_SUCCESS) printf("Option retrieved successfully. \r\n");
+    if( err_code == NRF_ERROR_INVALID_ADDR) printf("Invalid pointer supplied. \r\n");
+    if( err_code == BLE_ERROR_INVALID_CONN_HANDLE) printf("Invalid Connection Handle. \r\n");
+    if( err_code == NRF_ERROR_INVALID_PARAM) printf("Invalid parameter(s) supplied, check parameter limits and constraints. \r\n");
+    if( err_code == NRF_ERROR_INVALID_STATE) printf("Unable to retrieve the parameter at this time. \r\n");
+    if( err_code == NRF_ERROR_BUSY) printf("The BLE stack is busy or the previous procedure has not completed. \r\n");
+    if( err_code == NRF_ERROR_NOT_SUPPORTED) printf("This option is not supported. \r\n");
+    
+    if( err_code == BLE_ERROR_INVALID_ROLE) printf("Invalid role. \r\n");
+}
 
+//-----------------------------------------------------------------------------
 void BlkUp_Go_Test(void)
 {
 
     static uint8_t upbuf[128 * 16];
     static uint16_t upbuflen;
     uint16_t i;
+
+    uint32_t err_code;
+    uint32_t opt_id;
+    ble_opt_t ble_opt;
+    /*
+    opt_id = BLE_COMMON_OPT_CONN_BW; //BLE_CONN_BW_LOW;
+    err_code = sd_ble_opt_get(opt_id, &ble_opt);
+    printf("err_code = 0x%x\r\n", err_code);
+    ptec(err_code);
     
+    opt_id = BLE_COMMON_OPT_CONN_BW; //BLE_CONN_BW_LOW;
+    err_code = sd_ble_opt_set(opt_id, &ble_opt);
+    printf("err_code = 0x%x\r\n", err_code);
+    ptec(err_code);
+*/
+    /*
+    memset(&ble_opt, 0x00, sizeof(ble_opt));
+    uint8_t conn_bw;
+    //conn_bw = BLE_CONN_BW_HIGH;
+    conn_bw = BLE_CONN_BW_LOW;
+
+    ble_opt.common_opt.conn_bw.conn_bw.conn_bw_tx = conn_bw; //< Connection bandwidth configuration for transmission, see @ref BLE_CONN_BWS.
+    ble_opt.common_opt.conn_bw.conn_bw.conn_bw_rx = conn_bw;  //< Connection bandwidth configuration for reception, see @ref BLE_CONN_BWS.
+    ble_opt.common_opt.conn_bw.role = BLE_GAP_ROLE_PERIPH; //BLE_GAP_ROLE_CENTRAL; //#define BLE_GAP_ROLE_CENTRAL     0x2     Central Role. 
+    err_code = sd_ble_opt_set(BLE_COMMON_OPT_CONN_BW, &ble_opt);
+    printf("err_code = 0x%x\r\n", err_code);
+    ptec(err_code);
+
+    opt_id = BLE_COMMON_OPT_CONN_BW; //BLE_CONN_BW_LOW;
+    err_code = sd_ble_opt_get(opt_id, &ble_opt);
+    printf("err_code = 0x%x\r\n", err_code);
+    ptec(err_code);
+*/
+
+    uint32_t count = NRF_RTC0->COUNTER;
+    printf("\r\n");
+    printf("current RTC0 counter value is=%d\r\n",count);
 
     dbgPrintf("BlkUp_Go_Test\n\r");
 
-    upbuflen = 64 * 16;
-    //upbuflen = 16 * 16;
+    //upbuflen = 64 * 16;
+    upbuflen = 63 * 16 + 14;
     TestSkipN = 10;
     TestSkipN = -1;
-    TestSkipN = 31;
+    //TestSkipN = 31;
     
     for( i = 0 ; i< upbuflen; i++)
         upbuf[i] = (uint8_t)i;
     
     blk_up_set(upbuf, upbuflen);
     
+    SB_cnt = 0;
+    //SB_blk[0]. xxx = 0;
+
     //------------------------
 
     
