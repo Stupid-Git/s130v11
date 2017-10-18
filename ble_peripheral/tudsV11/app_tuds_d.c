@@ -18,7 +18,6 @@
 
 #include "app_tuds.h"
 
-#if SPLIT_UP_DN
 
 //-----------------------------------------------------------------------------
 #define APP_TIMER_PRESCALER 0
@@ -678,4 +677,3 @@ static void BlkDn_timeout_handler(void * p_context)
 }
 
 
-#endif //#if SPLIT_UP_DN

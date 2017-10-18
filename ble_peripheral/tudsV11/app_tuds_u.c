@@ -16,7 +16,6 @@
 #include "ble_tuds.h"
 #include "app_tuds.h"
 
-#if SPLIT_UP_DN
 
 
 #define APP_TIMER_PRESCALER 0
@@ -617,5 +616,4 @@ void BlkUp_Go( uint8_t *pkt, uint16_t len)
 }
 
 
-#endif //#if SPLIT_UP_DN
 

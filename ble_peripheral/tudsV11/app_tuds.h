@@ -8,8 +8,7 @@ extern "C"
 
 #include "stdint.h"
 
-#define SPLIT_UP_DN 0    
-    
+
 #include "ble_tuds.h"
 
 /* ----------------------------------------------------------------------------

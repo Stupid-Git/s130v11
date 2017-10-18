@@ -9,13 +9,10 @@
 
   <project>
     <PathAndName>.\ble_peripheral\ble_app_hrs\pca10028\s130_with_dfu\arm5_no_packs\ble_app_hrs_s130_with_dfu_pca10028.uvprojx</PathAndName>
-    <NodeIsExpanded>1</NodeIsExpanded>
   </project>
 
   <project>
     <PathAndName>.\ble_peripheral\tudsV11\pca10028\s130_with_dfu\arm5_no_packs\tudsv11_s130_with_dfu_pca10028.uvprojx</PathAndName>
-    <NodeIsActive>1</NodeIsActive>
-    <NodeIsExpanded>1</NodeIsExpanded>
   </project>
 
   <project>
@@ -24,6 +21,8 @@
 
   <project>
     <PathAndName>.\ble_peripheral\ud2V11\pca10028\s130_with_dfu\arm5_no_packs\ud2v11_s130_with_dfu_pca10028.uvprojx</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
+    <NodeIsExpanded>1</NodeIsExpanded>
   </project>
 
   <project>
