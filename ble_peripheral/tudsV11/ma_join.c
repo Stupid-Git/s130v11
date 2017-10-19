@@ -5,10 +5,10 @@ void BlkDn_unlockStateMachine(void);
 extern  uint8_t m_blkDn_buf[];
 extern  uint16_t m_blkDn_len;
 
-void BlkUp_Go( uint8_t *pkt, uint16_t len);
-
 
 //#include "app_tuds.h"
+extern int app_tuds_UpStartTX(app_tuds_t *p_app_tuds, uint8_t *pkt, uint16_t len);
+extern app_tuds_t          m_app_tuds;
 
 
 //-----------------------------------------------------------------------------
@@ -64,12 +64,13 @@ int make_req_BLE( be_t *be_Req )
 //-----------------------------------------------------------------------------
 int callThisWhenUartPacketForBleIsRecieved(void)
 {
-    //BlkUp_Go( m_curr_beUrx->buffer, m_curr_beUrx->length); //be_UB
+    //XXBlkUp_Go( m_curr_beUrx->buffer, m_curr_beUrx->length); //be_UB
     dbgPrintf("\r\nUB_len = %d", be_UB.length);
     dbgPrintf("\r\nUB[0] = %02x %02x %02x %02x", be_UB.buffer[0], be_UB.buffer[1], be_UB.buffer[2], be_UB.buffer[3]);
 
 
-    BlkUp_Go( be_UB.buffer, be_UB.length); //be_UB
+    app_tuds_UpStartTX(&m_app_tuds,  be_UB.buffer, be_UB.length); //be_UB
+
     return(0);
 }
 

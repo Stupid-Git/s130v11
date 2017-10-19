@@ -68,13 +68,13 @@ uint32_t GP_timer_start(uint32_t timeout_ticks);
 uint32_t GP_timer_stop(void);
 void GP_timer_GBN_enable(uint32_t ticks_until);
 
-uint32_t BlkUp_timer_init(void);
-uint32_t BlkUp_timer_start(uint32_t timeout_ticks);
-uint32_t BlkUp_timer_stop(void);
+//uint32_t BlkUp_timer_init(void);
+//uint32_t BlkUp_timer_start(uint32_t timeout_ticks);
+//uint32_t BlkUp_timer_stop(void);
 
-uint32_t BlkDn_timer_init(void);
-uint32_t BlkDn_timer_start(uint32_t timeout_ticks);
-uint32_t BlkDn_timer_stop(void);
+//uint32_t BlkDn_timer_init(void);
+//uint32_t BlkDn_timer_start(uint32_t timeout_ticks);
+//uint32_t BlkDn_timer_stop(void);
 
 
 enum e_ma_uart_timer_Reason

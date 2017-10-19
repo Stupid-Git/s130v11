@@ -10,7 +10,7 @@
       <TargetName>nrf51422_xxac_s130</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060183::V5.06 update 2 (build 183)::ARMCC</pCCUsed>
+      <pCCUsed>5060422::V5.06 update 4 (build 422)::ARMCC</pCCUsed>
       <TargetOption>
         <TargetCommonOption>
           <Device>nRF51422_xxAC</Device>
@@ -351,7 +351,7 @@
             <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define> BLE_DFU_APP_SUPPORT BLE_STACK_SUPPORT_REQD S130 BOARD_PCA10028 NRF_LOG_USES_UART=1 SWI_DISABLE0 SOFTDEVICE_PRESENT NRF51</Define>
+              <Define>BLE_DFU_APP_SUPPORT BLE_STACK_SUPPORT_REQD S130 BOARD_PCA10028 NRF_LOG_USES_UART=1 SWI_DISABLE0 SOFTDEVICE_PRESENT NRF51</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -1073,6 +1073,11 @@
               <FileName>ble_nus.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\components\ble\ble_services\ble_nus\ble_nus.c</FilePath>
+            </File>
+            <File>
+              <FileName>debug_etc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\debug_etc.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4679,6 +4684,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\components\ble\ble_services\ble_nus\ble_nus.c</FilePath>
             </File>
+            <File>
+              <FileName>debug_etc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\debug_etc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -7451,6 +7461,11 @@
               <FileName>ble_nus.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\components\ble\ble_services\ble_nus\ble_nus.c</FilePath>
+            </File>
+            <File>
+              <FileName>debug_etc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\debug_etc.c</FilePath>
             </File>
           </Files>
         </Group>

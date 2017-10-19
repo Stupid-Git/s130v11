@@ -8,15 +8,14 @@ extern "C"
 
 #include "stdint.h"
 
-
-#include "ble_tuds.h"
+#include "ble_ud2.h"
 
 /* ----------------------------------------------------------------------------
 *  TYPES
 */
-/* Forward declaration of the ble_tuds_t type. */
-struct app_tuds_s;
-typedef struct app_tuds_s app_tuds_t;
+/* Forward declaration of the ble_ud2_t type. */
+struct app_ud2_s;
+typedef struct app_ud2_s app_ud2_t;
 
 typedef enum
 {
@@ -27,45 +26,58 @@ typedef enum
     APP_TUDS_RX_DONE_PKT_0,
 
     APP_TUDS_TX_DONE,
-} app_tuds_evt_type_t;
+} app_ud2_evt_type_t;
 
 typedef struct
 {
-    app_tuds_evt_type_t evt_type; /**< Type of event. */
+    app_ud2_evt_type_t evt_type; /**< Type of event. */
     union
     {
         uint32_t error_communication; /**< Field used if evt_type is: APP_UART_COMMUNICATION_ERROR. This field contains the value in the ERRORSRC register for the UART peripheral. The UART_ERRORSRC_x defines from nrf5x_bitfields.h can be used to parse the error code. See also the \nRFXX Series Reference Manual for specification. */
         uint32_t error_code;          /**< Field used if evt_type is: NRF_ERROR_x. Additional status/error code if the error event type is APP_UART_FIFO_ERROR. This error code refer to errors defined in nrf_error.h. */
         uint8_t  value;               /**< Field used if evt_type is: NRF_ERROR_x. Additional status/error code if the error event type is APP_UART_FIFO_ERROR. This error code refer to errors defined in nrf_error.h. */
     } data;
-} app_tuds_evt_t;
+} app_ud2_evt_t;
 
 
-typedef void (* app_tuds_event_handler_t) (app_tuds_evt_t * p_app_tuds_event);
+typedef void (* app_ud2_event_handler_t) (app_ud2_evt_t * p_app_ud2_event);
 
-typedef void (* app_tuds_packet_handler_t) (app_tuds_t * p_ma_tuds, uint8_t * p_data, uint16_t length);
+typedef void (* app_ud2_packet_handler_t) (app_ud2_t * p_ma_ud2, uint8_t * p_data, uint16_t length);
 
 
-typedef struct app_tuds_init_s
+typedef struct app_ud2_init_s
 {
-    ble_tuds_t *p_ble_tuds;
-    app_tuds_packet_handler_t  packet_handler;    // Event handler to be called for handling received DCMD.
-    app_tuds_event_handler_t   event_handler;
+    ble_ud2_t *p_ble_ud2;
+    app_ud2_packet_handler_t  packet_handler;    // Event handler to be called for handling received DCMD.
+    app_ud2_event_handler_t   event_handler;
 
-} app_tuds_init_t;
+} app_ud2_init_t;
 
 
-typedef struct app_tuds_s
+typedef struct app_ud2_s
 {
-    ble_tuds_t *                p_ble_tuds;
-    app_tuds_packet_handler_t   packet_handler;
+    ble_ud2_t *                p_ble_ud2;
+    app_ud2_packet_handler_t   packet_handler;
 
-}app_tuds_t;
+}app_ud2_t;
 
 int callThisWhenUartPacketForBleIsRecieved(void); //ma_join.c
-int callThisWhenBlePacketIsRecieved(app_tuds_evt_t * p_app_tuds_event);  //ma_join.c
+int callThisWhenBlePacketIsRecieved(app_ud2_evt_t * p_app_ud2_event);  //ma_join.c
 
-void services_init_tuds_part(app_tuds_t *p_app_tuds, ble_tuds_t *p_ble_tuds);
+    
+
+
+//BOGUS
+/*
+#undef dbgPrintf
+#undef dbgPrint
+
+#define dbgPrintf printf
+#define dbgPrint  printf
+*/
+//BOGUS
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -197,9 +197,10 @@ STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                 
 
 #if USE_TUDS
 ble_tuds_t  m_ble_tuds;                                  // Structure to identify the BLKUP Service.
+app_tuds_t  m_app_tuds;                                  // Structure to identify the BLKUP Service.
 uint32_t timers_init_tuds_part(void);
-void services_init_tuds_part(void);
-void application_timers_start_tuds_part(void);
+//void services_init_tuds_part(void);
+//void application_timers_start_tuds_part(void);
 #endif
 
 
@@ -567,7 +568,7 @@ static void dis_init(void)
 // TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS
 #if USE_TUDS
 //extern void tuds_service_init(void);
-void services_init_tuds_part(void);
+//void services_init_tuds_part(void);
 #endif
 
 
@@ -660,7 +661,7 @@ static void services_init(void)
     dfu_init();
 
 #if USE_TUDS
-    services_init_tuds_part();
+    services_init_tuds_part(&m_app_tuds, &m_ble_tuds);
 #endif
 
 }

@@ -511,6 +511,8 @@ uint32_t ble_tuds_init(ble_tuds_t * p_tuds, const ble_tuds_init_t * p_tuds_init)
 
     // Initialize the service structure.
     p_tuds->conn_handle              = BLE_CONN_HANDLE_INVALID;
+    //===== APP connection =====
+    p_tuds->parentContext            = p_tuds_init->parentContext;
     //===== DN =====
     p_tuds->Ddat_handler             = p_tuds_init->Ddat_handler;
     p_tuds->Dcmd_handler             = p_tuds_init->Dcmd_handler;
