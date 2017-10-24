@@ -8,6 +8,7 @@ extern "C"
 
 #include "stdint.h"
 
+
 #include "ble_ud2.h"
 
 /* ----------------------------------------------------------------------------
@@ -40,29 +41,153 @@ typedef struct
 } app_ud2_evt_t;
 
 
-typedef void (* app_ud2_event_handler_t) (app_ud2_evt_t * p_app_ud2_event);
 
-typedef void (* app_ud2_packet_handler_t) (app_ud2_t * p_ma_ud2, uint8_t * p_data, uint16_t length);
+
+
 
 
 typedef struct app_ud2_init_s
 {
     ble_ud2_t *p_ble_ud2;
-    app_ud2_packet_handler_t  packet_handler;    // Event handler to be called for handling received DCMD.
-    app_ud2_event_handler_t   event_handler;
 
 } app_ud2_init_t;
 
+uint32_t  app_ud2_init(app_ud2_t * p_app_ud2, const app_ud2_init_t * p_app_ud2_init);
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Defines
+//-----------------------------------------------------------------------------
+typedef enum eBlkDnState
+{
+    eBlkDn_WAIT_CMD,
+    eBlkDn_WAIT_PACKET,
+    eBlkDn_CFM_RE_PRESEND,
+    eBlkDn_CFM_RE_SEND,
+    eBlkDn_GOT_PACKET,
+    eBlkDn_CFM_PRESEND, // set before CFM packet sent
+    eBlkDn_CFM_OK_SEND, // set after CFM packet sent
+    eBlkDn_CFM_NG_SEND, // set after CFM packet sent
+    eBlkDn_CFM_SENT, // set after CFM packet sent (Write Done or ACK) received
+
+    //eBlkDn_PROCESS_PACKET,
+    //eBlkDn_SEND_CMD,
+    //eBlkDn_SEND_DATA,
+    //eBlkDn_SEND_WAITCFM,
+
+} eBlkDnState_t;
+
+typedef enum eBlkDn_EV
+{
+    eBlkDn_EV_RXDONE,
+    eBlkDn_EV_CMD12,
+} eBlkDn_EV_t;
+
+typedef void (* blkDn_DnEventHandler_t)(app_ud2_t *p_app_ud2, eBlkDn_EV_t event, void *thing);
+
+
+
+typedef enum eBlkUpState
+{
+    eBlkUp_IDLE,
+    eBlkUp_CMD_PRESEND,
+    eBlkUp_CMD_SEND,
+    eBlkUp_CMD_SENT,
+    eBlkUp_DAT_PRESEND,
+    eBlkUp_DAT_SEND,
+    eBlkUp_DAT_SENT,
+    
+    eBlkUp_WAIT_CFM,
+    
+} eBlkUpState_t;
+
+
+typedef enum eBlkUp_EV
+{
+    eBlkUp_EV_TXDONE,
+    eBlkUp_EV_TXFAILED,
+} eBlkUp_EV_t;
+
+typedef void (* blkUp_UpEventHandler_t)(app_ud2_t *p_app_ud2, eBlkUp_EV_t event, void *thing);
+
+//-----------------------------------------------------------------------------
+// Variables
+//-----------------------------------------------------------------------------
+#define BLK_DN_COUNT (128 + 8)
+
+#define BLK_UP_COUNT (128 + 8)
 typedef struct app_ud2_s
 {
-    ble_ud2_t *                p_ble_ud2;
-    app_ud2_packet_handler_t   packet_handler;
 
+
+    ble_ud2_t *                p_ble_ud2;
+
+    //-------------------------------------------------------------------------
+    // DN
+    int      m_BlkDn_packetWaitTimeCount;// = 0;
+
+    uint8_t  m_blkDn_buf[ 16 * BLK_DN_COUNT ]; // 2048 @ BLK_DN_COUNT = 128
+    uint8_t  m_blkDn_chk[  1 * BLK_DN_COUNT ]; //  128 @ BLK_DN_COUNT = 128
+    uint16_t m_blkDn_len;
+    uint16_t m_blkDn_blkCnt;
+    uint16_t m_blkDn_rxBlkCnt;
+    
+    uint8_t  m_Dcfm_buf[20];
+    uint16_t m_Dcfm_len;
+    
+    eBlkDnState_t m_BlkDn_sm;// = eBlkDn_WAIT_CMD;
+
+    blkDn_DnEventHandler_t  blkDn_DnEventHandler;
+    
+    //-------------------------------------------------------------------------
+    // UP
+    uint8_t* m_blkUp_p_buf;//[ 16 * BLK_UP_COUNT ]; // 2048 @ BLK_UP_COUNT = 128
+    uint8_t  m_blkUp_chk[  1 * BLK_UP_COUNT ]; //  128 @ BLK_UP_COUNT = 128
+    uint16_t m_blkUp_len;
+    uint16_t m_blkUp_blkCnt;
+    uint16_t m_blkUp_txBlkCnt;
+    uint8_t  m_blkUp_chkSumLSB;
+    uint8_t  m_blkUp_chkSumMSB;
+
+    eBlkUpState_t m_BlkUp_sm;// = eBlkUp_IDLE;
+    
+    blkUp_UpEventHandler_t  blkUp_UpEventHandler;
+
+    
 }app_ud2_t;
 
-int callThisWhenUartPacketForBleIsRecieved(void); //ma_join.c
-int callThisWhenBlePacketIsRecieved(app_ud2_evt_t * p_app_ud2_event);  //ma_join.c
+
+void app_ud2_service_init(app_ud2_t *p_app_ud2, ble_ud2_t *p_ble_ud2);
+uint32_t app_ud2_timer_init(void);
+
+void app_ud2_on_ble_evt(app_ud2_t * p_app_ud2, ble_evt_t * p_ble_evt);
+
+int app_ud2_U_StartSendPacket(app_ud2_t *p_app_ud2, uint8_t *pkt, uint16_t len);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     
 
@@ -76,6 +201,7 @@ int callThisWhenBlePacketIsRecieved(app_ud2_evt_t * p_app_ud2_event);  //ma_join
 #define dbgPrint  printf
 */
 //BOGUS
+
 
 
 #ifdef __cplusplus

@@ -210,7 +210,7 @@ static void GP_timeout_handler(void * p_context) // Effectively a 1 Second timer
 
 
 //static uint32_t m_app_ticks_per_100ms;
-#define BSP_MS_TO_TICK(MS) (m_app_ticks_per_100ms * (MS / 100))
+//#define BSP_MS_TO_TICK(MS) (m_app_ticks_per_100ms * (MS / 100))
 
 uint32_t GP_timer_init(void)
 {

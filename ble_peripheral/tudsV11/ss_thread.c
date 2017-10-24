@@ -1,6 +1,7 @@
 
 #include "myapp.h"
 
+#define PUBLIC 
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -73,31 +74,32 @@ typedef struct coreProcBlock_s
 
 
 //.........................................................
-coreProcBlock_t cpb_BLE;
-extern int make_req_BLE( be_t *be_Req );
-extern int proc_rsp_BLE( be_t *be_Req,  be_t *be_Rsp );
-extern int proc_timeout_BLE( be_t *be_Req,  be_t *be_Rsp );
+static coreProcBlock_t cpb_BLE;
+#include "ma_join.h"
+// ma_join.h - extern int make_req_BLE( be_t *be_Req );
+// ma_join.h - extern int proc_rsp_BLE( be_t *be_Req,  be_t *be_Rsp );
+// ma_join.h - extern int proc_timeout_BLE( be_t *be_Req,  be_t *be_Rsp );
 
 //.........................................................
-coreProcBlock_t cpb_NANNY;
+static coreProcBlock_t cpb_NANNY;
 extern int make_req_NANNY( be_t *be_Req );
 extern int proc_rsp_NANNY( be_t *be_Req,  be_t *be_Rsp );
 extern int proc_timeout_NANNY( be_t *be_Req,  be_t *be_Rsp );
 
 //.........................................................
-coreProcBlock_t cpb_ADC;
+static coreProcBlock_t cpb_ADC;
 extern int make_req_ADC( be_t *be_Req );
 extern int proc_rsp_ADC( be_t *be_Req,  be_t *be_Rsp );
 extern int proc_timeout_ADC( be_t *be_Req,  be_t *be_Rsp );
 
 //.........................................................
-coreProcBlock_t cpb_BLN;
+static coreProcBlock_t cpb_BLN;
 extern int make_req_BLN( be_t *be_Req );
 extern int proc_rsp_BLN( be_t *be_Req,  be_t *be_Rsp );
 extern int proc_timeout_BLN( be_t *be_Req,  be_t *be_Rsp );
 
 //.........................................................
-coreProcBlock_t cpb_BLP;
+static coreProcBlock_t cpb_BLP;
 extern int make_req_BLP( be_t *be_Req );
 extern int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp );
 extern int proc_timeout_BLP( be_t *be_Req,  be_t *be_Rsp );
@@ -114,10 +116,10 @@ extern int proc_timeout_BLP( be_t *be_Req,  be_t *be_Rsp );
 //-----------------------------------------------------------------------------
 //===== Indicate_BufSend_Started =====
 //
-void be_BU_Indicate_BufSend_Started() { }
-void be_CUm_Indicate_BufSend_Started() { }
+static void be_BU_Indicate_BufSend_Started() { }
+static void be_CUm_Indicate_BufSend_Started() { }
 
-void be_Cxx_Indicate_BufSend_Started()
+PUBLIC void be_Cxx_Indicate_BufSend_Started()
 {
     // m_curr_beUtx->vIndicateUse_Start(m_curr_beUtx);
     if( m_curr_beUtx == &be_CUm ) be_CUm_Indicate_BufSend_Started();
@@ -129,7 +131,7 @@ void be_Cxx_Indicate_BufSend_Started()
 //-----------------------------------------------------------------------------
 //===== Indicate_BufSend_Done =====
 //
-void be_BU_Indicate_BufSend_Done()
+static void be_BU_Indicate_BufSend_Done()
 {
     /*TODO
     uniEvent_t LEvt;
@@ -144,7 +146,7 @@ void be_BU_Indicate_BufSend_Done()
     */
 }
 
-void be_CUm_Indicate_BufSend_Done()
+static void be_CUm_Indicate_BufSend_Done()
 {
     /*TODO
     uniEvent_t LEvt;
@@ -160,7 +162,7 @@ void be_CUm_Indicate_BufSend_Done()
     */
 }
 
-void be_Cxx_Indicate_BufSend_Done()
+PUBLIC void be_Cxx_Indicate_BufSend_Done()
 {
     if( m_curr_beUtx == &be_CUm ) be_CUm_Indicate_BufSend_Done();
     if( m_curr_beUtx == &be_BU  ) be_BU_Indicate_BufSend_Done();
@@ -169,23 +171,23 @@ void be_Cxx_Indicate_BufSend_Done()
 //-----------------------------------------------------------------------------
 //===== IndicateStartRecv =====
 //
-void be_UCm_IndicateStartRecv(void)
+PUBLIC void be_UCm_IndicateStartRecv(void)
 {
 }
-void be_UB_IndicateStartRecv(void)
+PUBLIC void be_UB_IndicateStartRecv(void)
 {
 }
 
 //-----------------------------------------------------------------------------
 //===== IndicateDoneRecv =====
 //
-void be_UCm_IndicateDoneRecv(void)
+PUBLIC void be_UCm_IndicateDoneRecv(void)
 {
     uniEvent_t LEvt;
     LEvt.evtType = evt_coreMaster_UartRxDone;
     core_thread_QueueSend(&LEvt); // ..._QueueSendFromISR( ... )
 }
-void be_UB_IndicateDoneRecv(void)
+PUBLIC void be_UB_IndicateDoneRecv(void)
 {
     uniEvent_t LEvt;
     LEvt.evtType = evt_bleMaster_UartRxDone;
@@ -206,7 +208,7 @@ void be_UB_IndicateDoneRecv(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-void P7_timerEvent(void); // drive WakePin_Release
+static void P7_timerEvent(void); // drive WakePin_Release
 
 //---------- P7 timer ----------
 APP_TIMER_DEF(m_P7_timer_id);
@@ -220,7 +222,7 @@ static void P7_timeout_handler(void * p_context)
 }
 
 
-uint32_t P7_timer_init(void)
+PUBLIC uint32_t P7_timer_init(void)
 {
     uint32_t err_code;
 
@@ -230,7 +232,7 @@ uint32_t P7_timer_init(void)
     return(err_code);
 }
 
-uint32_t P7_timer_start(uint32_t timeout_ticks)
+static uint32_t P7_timer_start(uint32_t timeout_ticks)
 {
     uint32_t err_code;
     // Start timer - Note: ignored if already started (freeRTOS)
@@ -239,17 +241,17 @@ uint32_t P7_timer_start(uint32_t timeout_ticks)
     return(err_code);
 }
 
-uint32_t P7_timer_stop(void)
+/* static uint32_t P7_timer_stop(void)
 {
     uint32_t err_code;
     // Stop timer
     err_code = app_timer_stop(m_P7_timer_id);
     APP_ERROR_CHECK(err_code);
     return(err_code);
-}
+} */
 
 
-void P8TimerEvent(void);
+static void P8TimerEvent(void);
 
 //---------- P8 timer ----------
 APP_TIMER_DEF(m_P8_timer_id);
@@ -262,7 +264,7 @@ static void P8_timeout_handler(void * p_context)
 }
 
 
-uint32_t P8_timer_init(void)
+PUBLIC uint32_t P8_timer_init(void)
 {
     uint32_t err_code;
 
@@ -272,7 +274,7 @@ uint32_t P8_timer_init(void)
     return(err_code);
 }
 
-uint32_t P8_timer_start(uint32_t timeout_ticks)
+static uint32_t P8_timer_start(uint32_t timeout_ticks)
 {
     uint32_t err_code;
     // Start timer - Note: ignored if already started (freeRTOS)
@@ -281,14 +283,14 @@ uint32_t P8_timer_start(uint32_t timeout_ticks)
     return(err_code);
 }
 
-uint32_t P8_timer_stop(void)
+/* static uint32_t P8_timer_stop(void)
 {
     uint32_t err_code;
     // Stop timer
     err_code = app_timer_stop(m_P8_timer_id);
     APP_ERROR_CHECK(err_code);
     return(err_code);
-}
+} */
 
 //-----------------------------------------------------------------------------
 extern bool BLN_boot;
@@ -305,10 +307,10 @@ typedef struct SSQ_item_s
 } SSQ_item_t;
 
 #define SSQ_LENGTH 10
-SSQ_item_t SSQ[SSQ_LENGTH];
+static SSQ_item_t SSQ[SSQ_LENGTH];
 
 //-----------------------------------------------------------------------------
-uint8_t SSQ_len()
+static uint8_t SSQ_len()
 {
     uint8_t count = 0;
     int i;
@@ -322,14 +324,14 @@ uint8_t SSQ_len()
 
 
 //-----------------------------------------------------------------------------
-void  SSQ_Item_Init( SSQ_item_t *pI )
+static void  SSQ_Item_Init( SSQ_item_t *pI )
 {
     //pI->name[0] = 0;
     pI->p_cpb = 0;
 }
 
 //-----------------------------------------------------------------------------
-void SSQ_Init()
+static void SSQ_Init()
 {
     int i;
     for( i=0 ; i<SSQ_LENGTH; i++)
@@ -339,7 +341,7 @@ void SSQ_Init()
 }
 
 //-----------------------------------------------------------------------------
-void SSQ_AddCpb(coreProcBlock_t *p_cpb)
+static void SSQ_AddCpb(coreProcBlock_t *p_cpb)
 {
     int i;
     for( i=0 ; i<SSQ_LENGTH; i++)
@@ -365,7 +367,7 @@ void SSQ_AddCpb(coreProcBlock_t *p_cpb)
 
 
 //-----------------------------------------------------------------------------
-void SSQ_Pop()
+static void SSQ_Pop()
 {
     int i;
     for( i=0 ; i<SSQ_LENGTH - 1; i++)
@@ -379,7 +381,7 @@ void SSQ_Pop()
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //-----------------------------------------------------------------------------
-void WakePin_Assert(void)
+static void WakePin_Assert(void)
 {  
 //NANNY pinWakeUp_Init();
     pinWakeUp_Init();
@@ -389,7 +391,7 @@ void WakePin_Assert(void)
 }
 
 //-----------------------------------------------------------------------------
-void WakePin_Release(char *S) //void WakePin_Release(void)
+PUBLIC void WakePin_Release(char *S) //void WakePin_Release(void)
 {
     pinWakeUp_Release();
     dbgPrint(S);
@@ -407,10 +409,10 @@ typedef enum eSS
     SS4_TXRX_HOLDOFF = 4,
     SS4_TXRX_DONE = 5,
 }eSS_t;
-eSS_t SS = SS_WAIT_STARTUP;
+static eSS_t SS = SS_WAIT_STARTUP;
 
 //-----------------------------------------------------------------------------
-void P7_timerEvent() //  P7_timer_start => ... drive WakePin_Release, 
+static void P7_timerEvent() //  P7_timer_start => ... drive WakePin_Release, 
 {
     uniEvent_t LEvt;
 
@@ -421,7 +423,7 @@ void P7_timerEvent() //  P7_timer_start => ... drive WakePin_Release,
 }
 
 //-----------------------------------------------------------------------------
-void P8TimerEvent()//  P8_timer_start => ... process SSQ again
+static void P8TimerEvent()//  P8_timer_start => ... process SSQ again
 {
     uniEvent_t LEvt;
 
@@ -436,7 +438,7 @@ void P8TimerEvent()//  P8_timer_start => ... process SSQ again
 //-----------------------------------------------------------------------------
 static uint32_t  autoTimeout_max = AUTOTIMEOUT_NONE;
 static uint32_t  autoTimeout_count = 0;
-void autoTimeout_Start( uint32_t timeout )
+PUBLIC void autoTimeout_Start( uint32_t timeout )
 {
     autoTimeout_max = timeout;
     autoTimeout_count = 0;
@@ -444,7 +446,7 @@ void autoTimeout_Start( uint32_t timeout )
 
 //-----------------------------------------------------------------------------
 extern uint16_t m_conn_handle; // = BLE_CONN_HANDLE_INVALID
-void autoTimeout_onTick()
+PUBLIC void autoTimeout_onTick()
 {
     if( autoTimeout_max == AUTOTIMEOUT_NONE)
         return;
@@ -764,7 +766,7 @@ static void SS_thread_process_event(uniEvent_t *pEvt)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 //-----------------------------------------------------------------------------
-void Holdoff_timeout_processing()
+PUBLIC void Holdoff_timeout_processing()
 {
     uniEvent_t LEvt;
     SS = SS4_TXRX_DONE;
@@ -776,7 +778,7 @@ void Holdoff_timeout_processing()
 //-----------------------------------------------------------------------------
 static uint32_t P7_ticks = 0;        // from  mg_7_wkUpPerX50ms 1~255 * 50ms LOW TIME FOR WAKEUP SIGNAL, 0 = WHOLE ACCESS PERIOD
 static uint32_t P8_ticks = 100 * 33; // from  mg_8_wkUpDelayX1ms
-void Update_P7_P8_ticks_from_mg7_mg8(void)
+PUBLIC void Update_P7_P8_ticks_from_mg7_mg8(void)
 {
     P8_ticks = APP_TIMER_TICKS( mg_8_wkUpDelayX1ms, APP_TIMER_PRESCALER);
     P7_ticks = APP_TIMER_TICKS( mg_7_wkUpPerX50ms * 50, APP_TIMER_PRESCALER);
@@ -983,7 +985,7 @@ static void SS_process_event(uniEvent_t *pEvt)
 
 
 //-----------------------------------------------------------------------------
-void core_thread_init()
+PUBLIC void core_thread_init()
 {
     be_Init();
     
@@ -1018,7 +1020,7 @@ static void core_thread_process_queue_item(void * p_event_data, uint16_t event_s
 }
 
 //-----------------------------------------------------------------------------
-void core_thread_QueueSend(uniEvent_t *pEvt)
+PUBLIC void core_thread_QueueSend(uniEvent_t *pEvt)
 {
     app_sched_event_put(pEvt, sizeof(uniEvent_t), core_thread_process_queue_item);
     //priority_sched_event_put(pEvt, sizeof(uniEvent_t), core_thread_process_queue_item);

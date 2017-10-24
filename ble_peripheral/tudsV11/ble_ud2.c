@@ -530,12 +530,14 @@ void sysinitsortathing()
     uint8_t   count;
     uint16_t  conn_handle = 42;
     err_code = sd_ble_tx_packet_count_get(conn_handle, &count);
-    
+    if( err_code != NRF_SUCCESS)
+    {
+    }
 }
 
 void kjhjkhkjhkjh()
 {
-    uint32_t err_code;
+    //uint32_t err_code;
     /*
     err_code = sd_ble_gatts_hvx(p_sts->conn_handle, &hvx_params);
     if(err_code == NRF_SUCCESS)

@@ -2544,19 +2544,9 @@
               <FilePath>..\..\..\sdo.c</FilePath>
             </File>
             <File>
-              <FileName>ble_ud2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\ble_ud2.c</FilePath>
-            </File>
-            <File>
               <FileName>ble_tuds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\ble_tuds.c</FilePath>
-            </File>
-            <File>
-              <FileName>app_ud2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\app_ud2.c</FilePath>
             </File>
             <File>
               <FileName>app_tuds.c</FileName>
@@ -2564,19 +2554,9 @@
               <FilePath>..\..\..\app_tuds.c</FilePath>
             </File>
             <File>
-              <FileName>app_ud2_d.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\app_ud2_d.c</FilePath>
-            </File>
-            <File>
               <FileName>app_tuds_d.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\app_tuds_d.c</FilePath>
-            </File>
-            <File>
-              <FileName>app_ud2_u.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\app_ud2_u.c</FilePath>
             </File>
             <File>
               <FileName>app_tuds_u.c</FileName>
@@ -2638,6 +2618,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\ma_utils.c</FilePath>
             </File>
+            <File>
+              <FileName>ma_join.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\ma_join.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2657,7 +2642,7 @@
         <TargetCommonOption>
           <Device>nRF51422_xxAC</Device>
           <Vendor>Nordic Semiconductor</Vendor>
-          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.8.14.1</PackID>
+          <PackID>NordicSemiconductor.nRF_DeviceFamilyPack.8.5.0</PackID>
           <PackURL>http://developer.nordicsemi.com/nRF5_SDK/pieces/nRF_DeviceFamilyPack/</PackURL>
           <Cpu>IROM(0x00000000,0x40000) IRAM(0x20000000,0x8000) CPUTYPE("Cortex-M0") CLOCK(16000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -5086,19 +5071,9 @@
               <FilePath>..\..\..\sdo.c</FilePath>
             </File>
             <File>
-              <FileName>ble_ud2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\ble_ud2.c</FilePath>
-            </File>
-            <File>
               <FileName>ble_tuds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\ble_tuds.c</FilePath>
-            </File>
-            <File>
-              <FileName>app_ud2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\app_ud2.c</FilePath>
             </File>
             <File>
               <FileName>app_tuds.c</FileName>
@@ -5106,19 +5081,9 @@
               <FilePath>..\..\..\app_tuds.c</FilePath>
             </File>
             <File>
-              <FileName>app_ud2_d.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\app_ud2_d.c</FilePath>
-            </File>
-            <File>
               <FileName>app_tuds_d.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\app_tuds_d.c</FilePath>
-            </File>
-            <File>
-              <FileName>app_ud2_u.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\app_ud2_u.c</FilePath>
             </File>
             <File>
               <FileName>app_tuds_u.c</FileName>
@@ -5179,6 +5144,11 @@
               <FileName>ma_utils.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\ma_utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>ma_join.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\ma_join.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -7932,11 +7902,6 @@
               <FilePath>..\..\..\sdo.c</FilePath>
             </File>
             <File>
-              <FileName>ble_ud2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\ble_ud2.c</FilePath>
-            </File>
-            <File>
               <FileName>ble_tuds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\ble_tuds.c</FilePath>
@@ -7992,179 +7957,14 @@
               </FileOption>
             </File>
             <File>
-              <FileName>app_ud2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\app_ud2.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-            <File>
               <FileName>app_tuds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\app_tuds.c</FilePath>
             </File>
             <File>
-              <FileName>app_ud2_d.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\app_ud2_d.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-            <File>
               <FileName>app_tuds_d.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\app_tuds_d.c</FilePath>
-            </File>
-            <File>
-              <FileName>app_ud2_u.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\app_ud2_u.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
             </File>
             <File>
               <FileName>app_tuds_u.c</FileName>
@@ -8225,6 +8025,11 @@
               <FileName>ma_utils.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\ma_utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>ma_join.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\ma_join.h</FilePath>
             </File>
           </Files>
         </Group>

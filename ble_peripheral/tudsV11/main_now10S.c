@@ -196,11 +196,8 @@ STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                 
 
 
 #if USE_TUDS
-ble_tuds_t  m_ble_tuds;                                  // Structure to identify the BLKUP Service.
-app_tuds_t  m_app_tuds;                                  // Structure to identify the BLKUP Service.
-uint32_t timers_init_tuds_part(void);
-//void services_init_tuds_part(void);
-//void application_timers_start_tuds_part(void);
+ble_tuds_t  m_ble_tuds;                                  // Structure to identify the ble_tuds Service.
+app_tuds_t  m_app_tuds;                                  // Structure to identify the app_tuds Application.
 #endif
 
 
@@ -333,7 +330,7 @@ static void timers_init()
     ma_holdoff_timer_init(); // Init the ... what is THIS timer ?!?
     
 #if USE_TUDS
-    timers_init_tuds_part();
+    app_tuds_timer_init();
 #endif
 
     P7_timer_init();         // Init the Parameter 7 timer (micro-processor Wake Timing
@@ -467,7 +464,7 @@ static void app_context_load(dm_handle_t const * p_handle)
             if ((err_code != NRF_SUCCESS) &&
                 (err_code != BLE_ERROR_INVALID_CONN_HANDLE) &&
                 (err_code != NRF_ERROR_INVALID_STATE) &&
-                (err_code != BLE_ERROR_NO_TX_PACKETS) && // was BLE_ERROR_NO_TX_BUFFERS ?error?
+                (err_code != BLE_ERROR_NO_TX_PACKETS) &&
                 (err_code != NRF_ERROR_BUSY) &&
                 (err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING))
             {
@@ -567,8 +564,6 @@ static void dis_init(void)
 // TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS
 // TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS
 #if USE_TUDS
-//extern void tuds_service_init(void);
-//void services_init_tuds_part(void);
 #endif
 
 
@@ -661,7 +656,7 @@ static void services_init(void)
     dfu_init();
 
 #if USE_TUDS
-    services_init_tuds_part(&m_app_tuds, &m_ble_tuds);
+    app_tuds_service_init(&m_app_tuds, &m_ble_tuds);
 #endif
 
 }
@@ -990,7 +985,8 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 #endif
     
 #if USE_TUDS
-    ble_tuds_on_ble_evt(&m_ble_tuds, p_ble_evt); //karel
+    ble_tuds_on_ble_evt(&m_ble_tuds, p_ble_evt);
+    app_tuds_on_ble_evt(&m_app_tuds, p_ble_evt);
 #endif
     
     ble_conn_params_on_ble_evt(p_ble_evt);   //asasasasOK
