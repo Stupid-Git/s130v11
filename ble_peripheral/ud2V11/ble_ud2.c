@@ -530,12 +530,14 @@ void sysinitsortathing()
     uint8_t   count;
     uint16_t  conn_handle = 42;
     err_code = sd_ble_tx_packet_count_get(conn_handle, &count);
-    
+    if( err_code != NRF_SUCCESS)
+    {
+    }
 }
 
 void kjhjkhkjhkjh()
 {
-    uint32_t err_code;
+    //uint32_t err_code;
     /*
     err_code = sd_ble_gatts_hvx(p_sts->conn_handle, &hvx_params);
     if(err_code == NRF_SUCCESS)
@@ -607,6 +609,8 @@ uint32_t ble_ud2_init(ble_ud2_t * p_ud2, const ble_ud2_init_t * p_ud2_init)
 
     // Initialize the service structure.
     p_ud2->conn_handle              = BLE_CONN_HANDLE_INVALID;
+    //===== APP connection =====
+    p_ud2->parentContext            = p_ud2_init->parentContext;
     //===== DN =====
     p_ud2->Ddat_data_handler             = p_ud2_init->Ddat_data_handler;
     p_ud2->Dcmd_data_handler             = p_ud2_init->Dcmd_data_handler;

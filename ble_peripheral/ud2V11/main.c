@@ -61,6 +61,7 @@
 
 #if USE_UD2
 #include "ble_ud2.h"
+#include "app_ud2.h"
 #endif
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT 0                                           /**< Include the service_changed characteristic. If not enabled, the server's database cannot be changed for the lifetime of the device. */
@@ -140,8 +141,9 @@ static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, 
 #if USE_UD2
 //static
 ble_ud2_t                        m_ble_ud2;                                      /**< Structure to identify the UD2 Service. */
+app_ud2_t                        m_app_ud2;                                      /**< Structure to identify the UD2 Service. */
 uint32_t timers_init_ud2_part(void);
-void services_init_ud2_part(void);
+void app_ud2_service_init(app_ud2_t *p_app_ud2, ble_ud2_t *p_ble_ud2);
 void application_timers_start_ud2_part(void);
 #endif
 //-----------------------------------------------------------------------------
@@ -202,7 +204,7 @@ static void timers_init() //karel
     //ma_uart_timer_init(); // karel - Init the timer for Uart Shutdown timimg
     //ma_holdoff_timer_init();
     
-    timers_init_ud2_part();  // USE_TUDS_U
+    app_ud2_timer_init(); //OLD timers_init_ud2_part();  // USE_TUDS_U
     
 
     
@@ -487,7 +489,7 @@ static void services_init(void)
     
     //-----
 #if USE_UD2
-    services_init_ud2_part();                               //// ADVERTISING UUID128 This one is FIRST
+    app_ud2_service_init(&m_app_ud2, &m_ble_ud2);         //// ADVERTISING UUID128 This one is FIRST
 /*
     ble_ud2_init_t ud2_init;
     memset(&ud2_init, 0, sizeof(ud2_init));
@@ -787,11 +789,13 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
     RX_next_ble_evt(/*&m_nus,*/ p_ble_evt);
 
     ble_ud2_on_ble_evt(&m_ble_ud2, p_ble_evt);
+    app_ud2_on_ble_evt(&m_app_ud2, p_ble_evt);
     
     on_ble_evt(p_ble_evt);
     ble_advertising_on_ble_evt(p_ble_evt);
     bsp_btn_ble_on_ble_evt(p_ble_evt);
     
+
 }
 
 
@@ -902,7 +906,6 @@ void bsp_event_handler(bsp_event_t event)
  *          @ref NUS_MAX_DATA_LENGTH.
  */
 /**@snippet [Handling the data received over UART] */
-void BlkUp_Go_Test(void);//karel
 void uart_event_handle(app_uart_evt_t * p_event)
 {
     static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
@@ -916,7 +919,7 @@ void uart_event_handle(app_uart_evt_t * p_event)
             
             //karel
             if(data_array[index]=='c')
-                BlkUp_Go_Test();
+                app_ud2_BlkUp_Go_Test(&m_app_ud2);
             //karel
             index++;
 
@@ -1206,7 +1209,7 @@ static void GP_timeout_handler(void * p_context) // Effectively a 1 Second timer
     {
         //sdoTE("GP: app_timer_stop NG\r\n");
         printf("GP: app_timer_stop NG\r\n");
-        printf("GP: app_timer_stop NG err=code = %d\r\n", err_code);
+        printf("GP: app_timer_stop NG err_code = %d\r\n", err_code);
     }
 */
     err_code = app_timer_start(m_GP_timer_id, APP_TIMER_TICKS(GP_TIMER_PERIOD_1000MS, APP_TIMER_PRESCALER), NULL);
@@ -1217,7 +1220,7 @@ static void GP_timeout_handler(void * p_context) // Effectively a 1 Second timer
     }
     if( err_code != NRF_SUCCESS )
     {
-        printf("@TG NG err=code = %d\r\n", err_code);
+        printf("@TG NG err_code = %d\r\n", err_code);
     }
     //if (err_code == NRF_ERROR_NO_MEM)
     //{

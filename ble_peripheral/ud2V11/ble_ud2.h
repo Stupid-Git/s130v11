@@ -23,6 +23,8 @@ typedef void (*ble_ud2_tx_complete_handler_t) (ble_ud2_t * p_ud2, ble_evt_t * p_
  */
 typedef struct
 {
+    void*                    parentContext;           // pointer to structure of upper service layer
+
     ble_ud2_data_handler_t   Dcmd_data_handler;            /**< Event handler to be called for handling received data. */
     ble_ud2_data_handler_t   Ddat_data_handler;            /**< Event handler to be called for handling received data. */
     ble_ud2_data_handler_t   Ucfm_data_handler;            /**< Event handler to be called for handling received data. */
@@ -39,6 +41,8 @@ struct ble_ud2_s
 {
     uint8_t                  uuid_type;               /**< UUID type for UD2 Service Base UUID. */
     uint16_t                 service_handle;          /**< Handle of UD2 Service (as provided by the SoftDevice). */
+
+    void*                      parentContext;           // pointer to structure of upper service layer
     
     ble_gatts_char_handles_t Dcmd_handles;            /**< Handles related to the Dcmd characteristic (as provided by the SoftDevice). */
     ble_gatts_char_handles_t Ddat_handles;            /**< Handles related to the Ddat characteristic (as provided by the SoftDevice). */

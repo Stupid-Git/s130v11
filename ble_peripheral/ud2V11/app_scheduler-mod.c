@@ -173,7 +173,7 @@ uint32_t app_sched_event_put(void                    * p_event_data,
             if(kmax<diff)
             {
                 kmax = diff;
-                //printf("\t\t\t\t kmax = %d, h = 0x%08x\r\n", kmax , (uint32_t)handler);
+                printf("\t\t\t\t kmax = %d, h = 0x%08x\r\n", kmax , (uint32_t)handler);
             }
             //printf("\t\t\t\t diff = %d, h = 0x%08x\r\n", diff, (uint32_t)handler);
             //karel karel karel karel karel karel karel karel karel karel karel karel karel karel karel karel karel karel karel 

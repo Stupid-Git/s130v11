@@ -20,14 +20,11 @@
 //-----------------------------------------------------------------------------
 // Defines
 #define APP_TIMER_PRESCALER 0                               //  APP_TIMER_PRESCALER 0 is usually defined in main (used for time calculations)
-#define BLE_ERROR_NO_TX_BUFFERS BLE_ERROR_NO_TX_PACKETS     //  SDK differences, different naming
 
 //-----------------------------------------------------------------------------
 extern ble_ud2_t  m_ble_ud2;                                //  used here for sending Notifications
 
 
-static uint8_t  m_Dcfm_buf[20];
-static uint16_t m_Dcfm_len;
 
 
 //-----------------------------------------------------------------------------
@@ -90,6 +87,22 @@ static inline uint32_t get_dnTxCompleteDelay(void)
     return dnTxCompleteDelay_ticks;
 }
 
+void printConnectionInfo(void)
+{
+    printf("\r\n");
+    printf("  Connection Interval     = %d\r\n", m_current_conn_params.max_conn_interval);
+    
+    get_dnDataDelay();
+    get_dnTxCompleteDelay();
+    
+    printf("  dnDataDelay_ms          = %d\r\n", dnDataDelay_ms);
+    printf("  dnTxCompleteDelay_ms    = %d\r\n", dnTxCompleteDelay_ms);
+    printf("  dnDataDelay_ticks       = %d\r\n", dnDataDelay_ticks);
+    printf("  dnTxCompleteDelay_ticks = %d\r\n", dnTxCompleteDelay_ticks);
+    printf("\r\n");
+  
+}
+
 //=============================================================================
 //=============================================================================
 //=============================================================================
@@ -119,39 +132,13 @@ static inline uint32_t get_dnTxCompleteDelay(void)
 *  BSS
 */
 
-#define BLK_DN_COUNT (128 + 8)
-
-static uint8_t  m_blkDn_buf[ 16 * BLK_DN_COUNT ]; // 2048 @ BLK_DN_COUNT = 128
-static uint8_t  m_blkDn_chk[  1 * BLK_DN_COUNT ]; //  128 @ BLK_DN_COUNT = 128
-static uint16_t m_blkDn_len;
-static uint16_t m_blkDn_blkCnt;
-static uint16_t m_blkDn_rxBlkCnt;
-
-extern app_ud2_event_handler_t    m_event_handler;
-
-
-//app_ud2_t                  m_app_ud2;
-//app_ud2_evt_t
-
-
-//int callThisWhenUartPacketForBleIsRecieved(void){ return(-1);} //ma_join.c
-//int callThisWhenBlePacketIsRecieved(app_ud2_evt_t * p_app_ud2_event){return(-1);}  //ma_join.c
 
 
 /* ----------------------------------------------------------------------------
 *  FUNCTIONS
 */
 
-//static void      ma_ud2_on_ble_evt(ble_ud2_t * p_ud2, ble_evt_t * p_ble_evt); //wrapper for ble_ud2_on_ble_evt
 
-//static uint32_t  ma_ud2_send_packet(app_ud2_t * p_ud2, uint8_t * buf, uint16_t* p_len16);
-
-//static void unused_function_calls_m_event_handler()
-//{
-//    app_ud2_evt_t app_ud2_event;
-//    
-//    m_event_handler(&app_ud2_event);
-//}
 //=============================================================================
 //=============================================================================
 //=============================================================================
@@ -172,52 +159,52 @@ extern app_ud2_event_handler_t    m_event_handler;
 //=============================================================================
 //=============================================================================
 //=============================================================================
-
+/*
 typedef enum eBlkDnState
 {
     eBlkDn_WAIT_CMD,
     eBlkDn_WAIT_PACKET,
-    eBlkDn_MISSING_PRESEND,
-    eBlkDn_MISSING_SEND,
     eBlkDn_GOT_PACKET,
-    eBlkDn_CFM_PRESEND, // set before CFM packet sent
-    eBlkDn_CFM_SEND, // set after CFM packet sent
-    eBlkDn_CFM_SENT, // set after CFM packet sent (Write Done or ACK) received
 
-    //eBlkDn_PROCESS_PACKET,
-    //eBlkDn_SEND_CMD,
-    //eBlkDn_SEND_DATA,
-    //eBlkDn_SEND_WAITCFM,
+    eBlkDn_CFM_OK_PRESEND, // set before CFM packet sent
+    eBlkDn_CFM_NG_PRESEND,
+    eBlkDn_CFM_RE_PRESEND,
+
+    eBlkDn_CFM_OK_SEND, // set after CFM packet sent
+    eBlkDn_CFM_NG_SEND, // set after CFM packet sent
+    eBlkDn_CFM_RE_SEND,
+
+    eBlkDn_CFM_SENT, // set after CFM packet sent (Write Done or ACK) received
 
 } eBlkDnState_t;
 
 
-static eBlkDnState_t m_BlkDn_sm = eBlkDn_WAIT_CMD;
-
+static eBlkDnState_t p_app_UD->m_BlkDn_sm = eBlkDn_WAIT_CMD;
+*/
 
 
 //-----------------------------------------------------------------------------
-static int32_t blk_dn_start( uint8_t *pkt )
+static int32_t blk_dn_start(app_ud2_t *p_app_UD, uint8_t *pkt )
 {
     uint8_t  j;
     uint16_t i;
 
-    m_blkDn_rxBlkCnt = 0;
-    m_blkDn_blkCnt = 0;    
+    p_app_UD->m_blkDn_rxBlkCnt = 0;
+    p_app_UD->m_blkDn_blkCnt = 0;    
     
-    m_blkDn_len = pkt[2] | (pkt[3]<<8);
-    if( m_blkDn_len == 0)
+    p_app_UD->m_blkDn_len = pkt[2] | (pkt[3]<<8);
+    if( p_app_UD->m_blkDn_len == 0)
         return(1);
     
-    m_blkDn_blkCnt = ((m_blkDn_len - 1) / 16) + 1;
+    p_app_UD->m_blkDn_blkCnt = ((p_app_UD->m_blkDn_len - 1) / 16) + 1;
     
     
-    for(i=0 ; i < m_blkDn_blkCnt; i++)
+    for(i=0 ; i < p_app_UD->m_blkDn_blkCnt; i++)
     {
-        m_blkDn_chk[i] = 0x00;
+        p_app_UD->m_blkDn_chk[i] = 0x00;
         for(j=0 ; j < 16; j++)
         {
-            m_blkDn_buf[i*16 + j] = 0x00;
+            p_app_UD->m_blkDn_buf[i*16 + j] = 0x00;
         }
     }
     
@@ -225,7 +212,7 @@ static int32_t blk_dn_start( uint8_t *pkt )
 }
 
 
-static int32_t blk_dn_add( uint8_t *pkt, uint16_t len )
+static int32_t blk_dn_add(app_ud2_t *p_app_UD, uint8_t *pkt, uint16_t len )
 {
     uint8_t  position;
     uint8_t  j;
@@ -238,11 +225,11 @@ static int32_t blk_dn_add( uint8_t *pkt, uint16_t len )
     if( position >= BLK_DN_COUNT)
         return(1);
     
-    m_blkDn_rxBlkCnt++;
-    m_blkDn_chk[position] += 1;
+    p_app_UD->m_blkDn_rxBlkCnt++;
+    p_app_UD->m_blkDn_chk[position] += 1;
     for(j=0 ; j < 16; j++)
     {
-        m_blkDn_buf[position*16 + j] = pkt[4 + j];
+        p_app_UD->m_blkDn_buf[position*16 + j] = pkt[4 + j];
     }
     return(0);
 }
@@ -250,7 +237,7 @@ static int32_t blk_dn_add( uint8_t *pkt, uint16_t len )
 #define DN_CHK_OK 0
 #define DN_CHK_CHKSUM_NG 3
 
-static int32_t blk_dn_chk()
+static int32_t blk_dn_chk(app_ud2_t *p_app_UD)
 {
 //    uint8_t  j;
     uint16_t i;
@@ -258,62 +245,67 @@ static int32_t blk_dn_chk()
     uint16_t cs_pkt;
     uint16_t cs_now;
  
-    if(m_blkDn_blkCnt == 0)
+    if(p_app_UD->m_blkDn_blkCnt == 0)
         return(1);
 
-    if(m_blkDn_rxBlkCnt < m_blkDn_blkCnt)
+    if(p_app_UD->m_blkDn_rxBlkCnt < p_app_UD->m_blkDn_blkCnt)
         return(1);
     
     missing_blk_cnt = 0;
-    for(i=0 ; i < m_blkDn_blkCnt; i++)
+    for(i=0 ; i < p_app_UD->m_blkDn_blkCnt; i++)
     {
-        if(m_blkDn_chk[i] == 0x00)
+        if(p_app_UD->m_blkDn_chk[i] == 0x00)
             missing_blk_cnt++;
     }
     if(missing_blk_cnt>0)
         return(2);
 
-    cs_pkt = m_blkDn_buf[m_blkDn_len - 2] | (m_blkDn_buf[m_blkDn_len - 1]<<8);
+    cs_pkt = p_app_UD->m_blkDn_buf[p_app_UD->m_blkDn_len - 2] | (p_app_UD->m_blkDn_buf[p_app_UD->m_blkDn_len - 1]<<8);
+#if 0 // _CRC
+    //cs_now = CRC_START_SEED; //0x0000;//0xFFFF;
+    //c_now = crc16_compute( &p_app_UD->m_blkDn_buf[0], p_app_UD->m_blkDn_len - 2, cs_now);
+#else    
     cs_now = 0;
-    for(i=0 ; i < m_blkDn_len - 2; i++)
+    for(i=0 ; i < p_app_UD->m_blkDn_len - 2; i++)
     {
-        cs_now += m_blkDn_buf[i];
+        cs_now += p_app_UD->m_blkDn_buf[i];
     }
+#endif
     if( cs_now != cs_pkt)
         return( DN_CHK_CHKSUM_NG );
     
     return(DN_CHK_OK);
 }
 
-static int32_t blk_dn_missing_count()
+static int32_t blk_dn_missing_count(app_ud2_t *p_app_UD)
 {
     uint16_t i;
     uint16_t missing_blk_cnt;
  
-    if(m_blkDn_blkCnt == 0)
+    if(p_app_UD->m_blkDn_blkCnt == 0)
         return(0);
    
     missing_blk_cnt = 0;
-    for(i=0 ; i < m_blkDn_blkCnt; i++)
+    for(i=0 ; i < p_app_UD->m_blkDn_blkCnt; i++)
     {
-        if(m_blkDn_chk[i] == 0x00)
+        if(p_app_UD->m_blkDn_chk[i] == 0x00)
             missing_blk_cnt++;
     }
     return(missing_blk_cnt);
 }
 
-static int32_t blk_dn_get_missing(uint8_t* buf, uint8_t count)
+static int32_t blk_dn_get_missing(app_ud2_t *p_app_UD, uint8_t* buf, uint8_t count)
 {
     uint16_t i;
     uint16_t missing_blk_cnt;
  
-    if(m_blkDn_blkCnt == 0)
+    if(p_app_UD->m_blkDn_blkCnt == 0)
         return(0);
    
     missing_blk_cnt = 0;
-    for(i=0 ; i < m_blkDn_blkCnt; i++)
+    for(i=0 ; i < p_app_UD->m_blkDn_blkCnt; i++)
     {
-        if(m_blkDn_chk[i] == 0x00)
+        if(p_app_UD->m_blkDn_chk[i] == 0x00)
         {
             missing_blk_cnt++;
             if( missing_blk_cnt <= count )
@@ -334,8 +326,7 @@ static int32_t blk_dn_get_missing(uint8_t* buf, uint8_t count)
 //  Timer
 //
 //-----------------------------------------------------------------------------
-//PUBLIC uint32_t BlkDn_timer_init(void);
-static uint32_t BlkDn_timer_start(uint32_t timeout_ticks, void* p_context);
+static uint32_t BlkDn_timer_start(app_ud2_t *p_app_UD, uint32_t timeout_ticks, void* p_context);
 static uint32_t BlkDn_timer_stop(void);
 static void BlkDn_timeout_handler(void * p_context);
 
@@ -348,33 +339,33 @@ static void BlkDn_timeout_handler(void * p_context);
 static char S1[] = "S1";
 static char S2[] = "S2";
 
-static uint32_t blk_dn_startSend_Dcfm_OK()
+static uint32_t blk_dn_startSend_Dcfm_OK(app_ud2_t *p_app_UD)
 {
     uint32_t err_code;
     
-    m_Dcfm_buf[0] = 1;
-    m_Dcfm_buf[1] = 0; // 0 = OK
-    m_Dcfm_len = 2;
+    p_app_UD->m_Dcfm_buf[0] = 1;
+    p_app_UD->m_Dcfm_buf[1] = 0; // 0 = OK
+    p_app_UD->m_Dcfm_len = 2;
     
-    // should be this mode m_BlkDn_sm = eBlkDn_GOT_PACKET;
+    // should be this mode p_app_UD->m_BlkDn_sm = eBlkDn_GOT_PACKET;
     
-    err_code = ble_ud2_notify_Dcfm( &m_ble_ud2, m_Dcfm_buf, &m_Dcfm_len);
+    err_code = ble_ud2_notify_Dcfm(p_app_UD->p_ble_ud2, p_app_UD->m_Dcfm_buf, &p_app_UD->m_Dcfm_len);
     if(err_code == NRF_SUCCESS)
     {
         printf("o");
-        m_BlkDn_sm = eBlkDn_CFM_SEND;
-        BlkDn_timer_start( get_dnTxCompleteDelay()/*APP_TIMER_TICKS(222, APP_TIMER_PRESCALER)*/, S1); // In Send_Dcfm_OK. wait for tx_complete, if timeout try Dcfm_OK again
+        p_app_UD->m_BlkDn_sm = eBlkDn_CFM_OK_SEND;
+        BlkDn_timer_start(p_app_UD, get_dnTxCompleteDelay(), S1); // In Send_Dcfm_OK. wait for tx_complete, if timeout try Dcfm_OK again
     }
     else
     if(err_code == BLE_ERROR_NO_TX_PACKETS)
     {
         printf("n");
-        // should be this mode m_BlkDn_sm = eBlkDn_GOT_PACKET;
-        BlkDn_timer_start( get_dnDataDelay()/*APP_TIMER_TICKS(222, APP_TIMER_PRESCALER)*/, S2); // In Send_Dcfm_OK. wait for next/another time when more buffers may be available, then try Dcfm_OK again
+        p_app_UD->m_BlkDn_sm = eBlkDn_CFM_OK_PRESEND;
+        BlkDn_timer_start(p_app_UD, get_dnDataDelay(), S2); // In Send_Dcfm_OK. wait for next/another time when more buffers may be available, then try Dcfm_OK again
     }
     else
     {
-        printf("x");
+        dbgPrint("x");
     }
 
     return(err_code);    
@@ -382,26 +373,26 @@ static uint32_t blk_dn_startSend_Dcfm_OK()
 
 static char S3[] = "S3";
 static char S4[] = "S4";
-static uint32_t blk_dn_startSend_Dcfm_NG()
+static uint32_t blk_dn_startSend_Dcfm_NG(app_ud2_t *p_app_UD)
 {
     uint32_t err_code;
     
-    m_Dcfm_buf[0] = 1;
-    m_Dcfm_buf[1] = 1; // 1 = NG (Checksum NG)
-    m_Dcfm_len = 2;
+    p_app_UD->m_Dcfm_buf[0] = 1;
+    p_app_UD->m_Dcfm_buf[1] = 1; // 1 = NG (Checksum NG)
+    p_app_UD->m_Dcfm_len = 2;
     
-    // should be this mode m_BlkDn_sm = eBlkDn_GOT_PACKET;
+    // should be this mode p_app_UD->m_BlkDn_sm = eBlkDn_GOT_PACKET;
     
-    err_code = ble_ud2_notify_Dcfm( &m_ble_ud2, m_Dcfm_buf, &m_Dcfm_len);
+    err_code = ble_ud2_notify_Dcfm(p_app_UD->p_ble_ud2, p_app_UD->m_Dcfm_buf, &p_app_UD->m_Dcfm_len);
     if(err_code == NRF_SUCCESS)
     {
-        m_BlkDn_sm = eBlkDn_CFM_SEND;
-        BlkDn_timer_start( get_dnTxCompleteDelay()/*APP_TIMER_TICKS(222, APP_TIMER_PRESCALER)*/, S3); // In Send_Dcfm_NG. wait for tx_complete, if timeout try Dcfm_NG again
+        p_app_UD->m_BlkDn_sm = eBlkDn_CFM_NG_SEND;
+        BlkDn_timer_start(p_app_UD, get_dnTxCompleteDelay(), S3); // In Send_Dcfm_NG. wait for tx_complete, if timeout try Dcfm_NG again
     }
-    if(err_code == BLE_ERROR_NO_TX_BUFFERS)
+    if(err_code == BLE_ERROR_NO_TX_PACKETS)
     {
-        // should be this mode m_BlkDn_sm = eBlkDn_GOT_PACKET;
-        BlkDn_timer_start( get_dnDataDelay()/*APP_TIMER_TICKS(222, APP_TIMER_PRESCALER)*/, S4); // In Send_Dcfm_NG. wait for next/another time when more buffers may be available, then try Dcfm_NG again
+        p_app_UD->m_BlkDn_sm = eBlkDn_CFM_NG_PRESEND;
+        BlkDn_timer_start(p_app_UD, get_dnDataDelay(), S4); // In Send_Dcfm_NG. wait for next/another time when more buffers may be available, then try Dcfm_NG again
     }
 
     return(err_code);    
@@ -409,40 +400,44 @@ static uint32_t blk_dn_startSend_Dcfm_NG()
 
 static char S5[] = "S5";
 static char S6[] = "S6";
-static uint32_t blk_dn_startSend_Dcfm_missing(int max_entries)
+
+static uint32_t blk_dn_startSend_Dcfm_missing(app_ud2_t *p_app_UD, int max_entries)
 {
     uint32_t err_code;
     
-    m_Dcfm_buf[0] = 1;
-    m_Dcfm_buf[1] = 2; // 2 = Missing
+    p_app_UD->m_Dcfm_buf[0] = 1;
+    p_app_UD->m_Dcfm_buf[1] = 2; // 2 = Missing
     
-    int n = blk_dn_missing_count();
+    int n = blk_dn_missing_count(p_app_UD);
     if( n > max_entries )
         n = max_entries;
-    m_Dcfm_buf[2] = n;
-    blk_dn_get_missing( &m_Dcfm_buf[3], n );
-    m_Dcfm_len = 3 + n;
+    p_app_UD->m_Dcfm_buf[2] = n;
+    blk_dn_get_missing(p_app_UD, &p_app_UD->m_Dcfm_buf[3], n );
+    p_app_UD->m_Dcfm_len = 3 + n;
     
-    // should be this mode m_BlkDn_sm = eBlkDn_GOT_PACKET;
+    // should be this mode p_app_UD->m_BlkDn_sm = eBlkDn_GOT_PACKET;
     
-    err_code = ble_ud2_notify_Dcfm( &m_ble_ud2, m_Dcfm_buf, &m_Dcfm_len);
+    err_code = ble_ud2_notify_Dcfm(p_app_UD->p_ble_ud2, p_app_UD->m_Dcfm_buf, &p_app_UD->m_Dcfm_len);
+    if(err_code != NRF_SUCCESS)
+    {
+        dbgPrint("ble_ud2_notify_Dcfm=<TODO not OK>\n\r");
+        //dbgPrint("ble_ud2_notify_Dcfm=%d\n\r", err_code);
+    }
+
     if(err_code == NRF_SUCCESS)
     {
         printf("mo");
         //BlkDn_timer_stop();
-        m_BlkDn_sm = eBlkDn_MISSING_SEND;
-        BlkDn_timer_start( get_dnTxCompleteDelay()/*APP_TIMER_TICKS(222, APP_TIMER_PRESCALER)*/, S5); // In Send_Dcfm_missing. wait for tx_complete, if timeout try Dcfm_missing again
-    }
-    else
-    if(err_code == BLE_ERROR_NO_TX_BUFFERS)
+        p_app_UD->m_BlkDn_sm = eBlkDn_CFM_RE_SEND;
+        BlkDn_timer_start(p_app_UD, get_dnTxCompleteDelay(), S5); // In Send_Dcfm_missing. wait for tx_complete, if timeout try Dcfm_missing again
+    }    else
+    if(err_code == BLE_ERROR_NO_TX_PACKETS)
     {
         printf("mn");
-        // should be this mode m_BlkDn_sm = eBlkDn_GOT_PACKET;
         //BlkDn_timer_stop();
-        m_BlkDn_sm = eBlkDn_MISSING_PRESEND;
-        BlkDn_timer_start( get_dnDataDelay()/*APP_TIMER_TICKS(222, APP_TIMER_PRESCALER)*/, S6); // In Send_Dcfm_missing. wait for next/another time when more buffers may be available, then try Dcfm_missing again
-    }
-    else
+        p_app_UD->m_BlkDn_sm = eBlkDn_CFM_RE_PRESEND;
+        BlkDn_timer_start(p_app_UD, get_dnDataDelay(), S6); // In Send_Dcfm_missing. wait for next/another time when more buffers may be available, then try Dcfm_missing again
+    }    else
     {
         printf("mx");
     }
@@ -455,112 +450,110 @@ static uint32_t blk_dn_startSend_Dcfm_missing(int max_entries)
 //  Events
 //
 //-----------------------------------------------------------------------------
-void BlkUp_Go_Test(void);
+void app_ud2_BlkUp_Go_Test(app_ud2_t *p_app_UD);
 
 void  BlkUart_Purge(void);
-void  BlkUp_Purge(void);
-void  BlkDn_Purge(void)
+void  app_ud2_BlkUp_Purge(app_ud2_t *p_app_UD);
+static void  BlkDn_Purge(app_ud2_t *p_app_UD)
 {
-    m_BlkDn_sm = eBlkDn_WAIT_CMD;
-    BlkUp_Purge();
+    p_app_UD->m_BlkDn_sm = eBlkDn_WAIT_CMD;
+    app_ud2_BlkUp_Purge(p_app_UD);
 #if USE_DRCT
     BlkUart_Purge();
 #endif
 }
+
+
 //-----------------------------------------------------------------------------
 //
 //  Events
 //
 //-----------------------------------------------------------------------------
 
-static int m_BlkDn_packetWaitTimeCount = 0;
 
-int32_t app_ud2_Dcmd_handler(app_ud2_t *p_app_ud2, uint8_t *buf, uint8_t len)
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+int32_t app_ud2_Dcmd_handler(app_ud2_t *p_app_UD, uint8_t *buf, uint8_t len)
 {
     int32_t r;
     uint8_t  byteZero;
-    app_ud2_evt_t app_ud2_event;
 
     if( (buf[0] == 1) && (buf[1] == 1) )
     {
-        m_BlkDn_packetWaitTimeCount = 0;
+        p_app_UD->m_BlkDn_packetWaitTimeCount = 0;
         dbgPrint("S");
-        r = blk_dn_start(buf);
-        m_BlkDn_sm = eBlkDn_WAIT_PACKET;
+        r = blk_dn_start(p_app_UD, buf);
+        p_app_UD->m_BlkDn_sm = eBlkDn_WAIT_PACKET;
 
     }
     if( (buf[0] == 1) && (buf[1] == 2) )
     {
         byteZero = 0;
         
-        m_blkDn_len = 3;
-        m_blkDn_buf[0] = byteZero;
-        m_blkDn_buf[1] = 0x00; // totalCheckSum
-        m_blkDn_buf[2] = 0x00; // totalCheckSum
+        p_app_UD->m_blkDn_len = 3;
+        p_app_UD->m_blkDn_buf[0] = byteZero;
+        p_app_UD->m_blkDn_buf[1] = 0x00; // totalCheckSum
+        p_app_UD->m_blkDn_buf[2] = 0x00; // totalCheckSum
         
-    
-        app_ud2_event.evt_type = APP_TUDS_RX_PKT_1; // Dcmd[1,2] event
-        app_ud2_event.data.value = 42;//dummy
-        m_event_handler(&app_ud2_event);    
-        
-        //callThisWhenBlePacketIsRecieved();
-        //m_app_ud2.OnEvent();
-        //BlkUart_directUartSend(m_blkDn_buf, m_blkDn_len - 2); // Added "- 2" because there is no need to send the totalCheckSum
-        //BlkUp_Go_Test();    
+        p_app_UD->blkDn_DnEventHandler(p_app_UD, eBlkDn_EV_CMD12, 0);
     }
+
     if( (buf[0] == 1) && (buf[1] == 3) )
     {
-        BlkDn_Purge();
+        BlkDn_Purge(p_app_UD);
     }
 
     if( (buf[0] == 1) && (buf[1] == 42) )
     {
-        BlkUp_Go_Test();    
+        printConnectionInfo();
+        app_ud2_BlkUp_Go_Test(p_app_UD);    
     }
 
     return(r);
 }
 
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
 static char S7[] = "S7";
-int32_t app_ud2_Ddat_handler(app_ud2_t *p_app_ud2, uint8_t *buf, uint8_t len)
+int32_t app_ud2_Ddat_handler(app_ud2_t *p_app_UD, uint8_t *buf, uint8_t len)
 {
     int32_t r;
 
     BlkDn_timer_stop();
-    m_BlkDn_packetWaitTimeCount = 0;
-    //printf("-");
-    r = blk_dn_add( buf, len);
+    p_app_UD->m_BlkDn_packetWaitTimeCount = 0;
+    r = blk_dn_add(p_app_UD, buf, len);
     
-    r = blk_dn_chk();
+    r = blk_dn_chk(p_app_UD);
     if(r == DN_CHK_OK)
     {
-        printf("O");
-        //dbgPrint("O");
-        m_BlkDn_sm = eBlkDn_GOT_PACKET;
-        blk_dn_startSend_Dcfm_OK();
+        dbgPrint("O");
+        p_app_UD->m_BlkDn_sm = eBlkDn_GOT_PACKET;
+        blk_dn_startSend_Dcfm_OK(p_app_UD);
     }
     else
     if(r == DN_CHK_CHKSUM_NG)
     {
-        printf("N");
-        //dbgPrint("N");
-        m_BlkDn_sm = eBlkDn_GOT_PACKET;
-        blk_dn_startSend_Dcfm_NG();
+        dbgPrint("N");
+        p_app_UD->m_BlkDn_sm = eBlkDn_GOT_PACKET;
+        blk_dn_startSend_Dcfm_NG(p_app_UD);
     }
     else
     {
-        //printf("%%");
-        //karel dbgPrint("D");
-        BlkDn_timer_start( get_dnDataDelay()/*APP_TIMER_TICKS(222, APP_TIMER_PRESCALER)*/, S7); // Data Ddat arrived, but still more to come. This timeout in case packets stop comming -> send a Dcfm_mising
+        dbgPrint("D");
+        BlkDn_timer_start(p_app_UD,  get_dnDataDelay(), S7); // Data Ddat arrived, but still more to come. This timeout in case packets stop comming -> send a Dcfm_mising
     }
     
     return(r);
 }
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
 
-bool m_BlkDn_stateMachineLocked = false;
+static bool m_BlkDn_stateMachineLocked = false;
 
-
-void BlkDn_lockStateMachine(void)
+static void BlkDn_lockStateMachine(void)
 {
     m_BlkDn_stateMachineLocked = true;
 }
@@ -568,57 +561,83 @@ void BlkDn_unlockStateMachine(void)
 {
     m_BlkDn_stateMachineLocked = false;
 }
-static void on_blk_dn_packetReceived()
-{
-    //app_ud2_evt_t app_ud2_event;
 
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+static void on_blk_dn_packetReceived(app_ud2_t *p_app_UD)
+{
     // Finally, let the SM accept new packets
     BlkDn_lockStateMachine();
-    m_BlkDn_sm = eBlkDn_WAIT_CMD;
+    p_app_UD->m_BlkDn_sm = eBlkDn_WAIT_CMD;
 
 #if 1 //testing use 1 karel
-    //karel BlkUp_Go_Test();
+    //karel app_ud2_BlkUp_Go_Test(p_app_UD);
     printf("\nPackets RX DONE\n");
    
     BlkDn_unlockStateMachine();
 #else
-    app_ud2_event.evt_type = APP_TUDS_RX_PKT_0; // Dcmd[1,1] ... packet received event
-    app_ud2_event.data.value = 42;//dummy
-    m_event_handler(&app_ud2_event);    
-    //callThisWhenBlePacketIsRecieved();
+    if(p_app_UD->blkDn_DnEventHandler)
+        p_app_UD->blkDn_DnEventHandler(p_app_UD, eBlkDn_EV_RXDONE, 0);
 #endif
 }
 
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+PUBLIC uint32_t app_tuds_Dn_AllowNextPacket(app_ud2_t *p_app_UD)
+{
+    p_app_UD->m_BlkDn_sm = eBlkDn_WAIT_CMD;
+    BlkDn_unlockStateMachine(); //??????????????????????
+    return(0);
+}
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+PUBLIC uint32_t app_tuds_RegCb_DnEventHandler(app_ud2_t *p_app_UD, blkDn_DnEventHandler_t  cb)
+{
+    p_app_UD->blkDn_DnEventHandler = cb;
+    return(0);
+}
+
+
 static char S8[] = "S8";
-int32_t app_ud2_OnWrittenComplete_Dcfm_handler(app_ud2_t *p_app_ud2,  uint8_t *buf, uint8_t len)
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+int32_t app_ud2_Dcfm_handler_OnWrittenComplete(app_ud2_t *p_app_UD,  uint8_t *buf, uint8_t len) //int32_t BlkDn_On_written_Dcfm(ble_ud2_t *p_tuds,  uint8_t *buf, uint8_t len)
 {
     int32_t r;
 
     // Check if in proper state
-    if( (m_BlkDn_sm != eBlkDn_CFM_SEND) &&  (m_BlkDn_sm != eBlkDn_MISSING_SEND)   )
+    if( (p_app_UD->m_BlkDn_sm != eBlkDn_CFM_OK_SEND) &&
+        (p_app_UD->m_BlkDn_sm != eBlkDn_CFM_NG_SEND) &&
+        (p_app_UD->m_BlkDn_sm != eBlkDn_CFM_RE_SEND)   )
         return(0);
 
-    if( m_BlkDn_sm == eBlkDn_CFM_SEND)
-    {
-        dbgPrint(" CFM Send ");
-    }
-    if(m_BlkDn_sm == eBlkDn_MISSING_SEND) 
-    {
-        dbgPrint(" MissSend ");
-    }
+    if( p_app_UD->m_BlkDn_sm == eBlkDn_CFM_OK_SEND)   dbgPrint(" CFM OK Send ");
+    if( p_app_UD->m_BlkDn_sm == eBlkDn_CFM_NG_SEND)   dbgPrint(" CFM NG Send ");
+    if( p_app_UD->m_BlkDn_sm == eBlkDn_CFM_RE_SEND)   dbgPrint(" CFM RE Send ");
+
     //dbgPrint("C");
     //dbgPrint("C");
 
     BlkDn_timer_stop();
-    if( m_BlkDn_sm == eBlkDn_CFM_SEND)
+    if( p_app_UD->m_BlkDn_sm == eBlkDn_CFM_OK_SEND)
     {
-        m_BlkDn_sm = eBlkDn_CFM_SENT; 
-        on_blk_dn_packetReceived();
+        p_app_UD->m_BlkDn_sm = eBlkDn_CFM_SENT; 
+        on_blk_dn_packetReceived(p_app_UD);
     }
-    if( m_BlkDn_sm == eBlkDn_MISSING_SEND)
+    if( p_app_UD->m_BlkDn_sm == eBlkDn_CFM_NG_SEND)
     {
-        m_BlkDn_sm = eBlkDn_WAIT_PACKET;
-        BlkDn_timer_start( get_dnDataDelay()/*APP_TIMER_TICKS(222, APP_TIMER_PRESCALER)*/, S8); // In tx_complete, if Dcfm_missing was what wa sent, this timeout to wait for more data
+        p_app_UD->m_BlkDn_sm = eBlkDn_WAIT_CMD; 
+    }
+    if( p_app_UD->m_BlkDn_sm == eBlkDn_CFM_RE_SEND)
+    {
+        p_app_UD->m_BlkDn_sm = eBlkDn_WAIT_PACKET;
+        BlkDn_timer_start(p_app_UD, get_dnDataDelay(), S8); // In tx_complete, if Dcfm_missing was what wa sent, this timeout to wait for more data
     }
     return(r);
 }
@@ -633,17 +652,12 @@ int32_t app_ud2_OnWrittenComplete_Dcfm_handler(app_ud2_t *p_app_ud2,  uint8_t *b
 APP_TIMER_DEF(m_BlkDn_timer_id);
 
 
-//static uint32_t m_app_ticks_per_100ms;
-//#define BSP_MS_TO_TICK(MS) (m_app_ticks_per_100ms * (MS / 100))
-
-PUBLIC uint32_t BlkDn_timer_init(void)
+PUBLIC uint32_t app_ud2_BlkDn_timer_init(void)
 {
     uint32_t err_code;
 
     // Create timer
-    err_code = app_timer_create(&m_BlkDn_timer_id,
-                                APP_TIMER_MODE_SINGLE_SHOT, //APP_TIMER_MODE_REPEATED,
-                                BlkDn_timeout_handler);
+    err_code = app_timer_create(&m_BlkDn_timer_id, APP_TIMER_MODE_SINGLE_SHOT, BlkDn_timeout_handler);
     if (err_code != NRF_SUCCESS)
     {
         ;
@@ -652,7 +666,7 @@ PUBLIC uint32_t BlkDn_timer_init(void)
     return(err_code);
 }
 
-static uint32_t BlkDn_timer_start(uint32_t timeout_ticks, void* p_context)
+static uint32_t BlkDn_timer_start(app_ud2_t *p_app_UD, uint32_t timeout_ticks, void* p_context)
 {
     uint32_t err_code;
 
@@ -660,12 +674,12 @@ static uint32_t BlkDn_timer_start(uint32_t timeout_ticks, void* p_context)
     err_code = app_timer_stop(m_BlkDn_timer_id);
     if( err_code != NRF_SUCCESS )
     {
-        printf("@DS NG err=code = %d\r\n", err_code);
+        printf("@DS NG err_code = %d\r\n", err_code);
     }
-    err_code = app_timer_start(m_BlkDn_timer_id, timeout_ticks,  p_context); //NULL);
+    err_code = app_timer_start(m_BlkDn_timer_id, timeout_ticks, p_app_UD); //p_context);
     if( err_code != NRF_SUCCESS )
     {
-        printf("@DG NG err=code = %d\r\n", err_code);
+        printf("@DG NG err_code = %d\r\n", err_code);
     }
 
     //printf("@D");
@@ -680,83 +694,114 @@ static uint32_t BlkDn_timer_stop(void)
     err_code = app_timer_stop(m_BlkDn_timer_id);
     if( err_code != NRF_SUCCESS )
     {
-        printf("@DS NG err=code = %d\r\n", err_code);
+        printf("@DS NG err_code = %d\r\n", err_code);
     }
     //APP_ERROR_CHECK(err_code);
     return(err_code);
 }
 
-static void blk_dn_printState(void)
+
+static void blk_dn_printState(app_ud2_t *p_app_UD)
 {
-    if(m_BlkDn_sm == eBlkDn_WAIT_CMD       ) dbgPrint("(W_C)");
-    if(m_BlkDn_sm == eBlkDn_WAIT_PACKET    ) dbgPrint("(W_P)");
-    if(m_BlkDn_sm == eBlkDn_MISSING_PRESEND) dbgPrint("(M_P)");
-    if(m_BlkDn_sm == eBlkDn_MISSING_SEND   ) dbgPrint("(M_S)");
-    if(m_BlkDn_sm == eBlkDn_GOT_PACKET     ) dbgPrint("(G_P)");
-    if(m_BlkDn_sm == eBlkDn_CFM_PRESEND    ) dbgPrint("(C_P)"); // set before CFM packet sent
-    if(m_BlkDn_sm == eBlkDn_CFM_SEND       ) dbgPrint("(C_S)"); // set after CFM packet sent
-    if(m_BlkDn_sm == eBlkDn_CFM_SENT       ) dbgPrint("(C_T)"); // set after CFM packet sent (Write Done or ACK) received
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_WAIT_CMD       ) dbgPrint("[W_C]");
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_WAIT_PACKET    ) dbgPrint("[W_P]");
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_RE_PRESEND ) dbgPrint("[M_P]");
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_RE_SEND    ) dbgPrint("[M_S]");
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_GOT_PACKET     ) dbgPrint("[G_P]");
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_OK_PRESEND ) dbgPrint("[C_P]"); // set before CFM packet sent
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_OK_SEND    ) dbgPrint("[C_S]"); // set after CFM packet sent
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_NG_SEND    ) dbgPrint("[C_S]"); // set after CFM packet sent
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_SENT       ) dbgPrint("[C_T]"); // set after CFM packet sent (Write Done or ACK) received
 }
 
 static void BlkDn_timeout_handler(void * p_context)
 {
     UNUSED_PARAMETER(p_context);
-#if 0
-    dbgPrint("*");
-#else    
-    dbgPrint("*");
-    blk_dn_printState();
     
-    printf((char*)p_context);
+    app_ud2_t *p_app_UD;
+    p_app_UD = p_context; //WWRONG
     
-    if(m_BlkDn_sm == eBlkDn_WAIT_CMD) // Do nothing
+    dbgPrint("*");
+    blk_dn_printState(p_app_UD);
+    
+    //printf((char*)p_context);
+    
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_WAIT_CMD) // Do nothing
     { } //Just waiting for a start up packet
     else
-    if(m_BlkDn_sm == eBlkDn_WAIT_PACKET) // Should have got the next data packet by now
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_WAIT_PACKET) // Should have got the next data packet by now
     {
-        if(++m_BlkDn_packetWaitTimeCount > 3)
+        if(++p_app_UD->m_BlkDn_packetWaitTimeCount > 3)
         {
-            m_BlkDn_packetWaitTimeCount = 0;
-            m_BlkDn_sm = eBlkDn_WAIT_CMD; // Reset
+            p_app_UD->m_BlkDn_packetWaitTimeCount = 0;
+            p_app_UD->m_BlkDn_sm = eBlkDn_WAIT_CMD; // Reset
         }
         else
         {
-            dbgPrint("(WP)");
-            blk_dn_startSend_Dcfm_missing(4);
+            dbgPrint("[WP]");
+            blk_dn_startSend_Dcfm_missing(p_app_UD, 4);
         }
     }
     else
-    if(m_BlkDn_sm == eBlkDn_GOT_PACKET) // Do nothing
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_GOT_PACKET) // Do nothing
     { } // Just got the packet so I should have cancelled the timer
     else
-    if(m_BlkDn_sm == eBlkDn_MISSING_PRESEND) // buffer was full last time, so try again
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_RE_PRESEND) // buffer was full last time, so try again
     {
-            dbgPrint("(MPre)");
-            blk_dn_startSend_Dcfm_missing(4);
+            dbgPrint("[MPre]");
+            blk_dn_startSend_Dcfm_missing(p_app_UD, 4);
     }
     else
-    if(m_BlkDn_sm == eBlkDn_MISSING_SEND) // we didn't get a write done
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_RE_SEND) // we didn't get a write done
     {
-            dbgPrint("(MSend)");
-            blk_dn_startSend_Dcfm_missing(4);
+            dbgPrint("[MSend]");
+            blk_dn_startSend_Dcfm_missing(p_app_UD, 4);
     }
     else
-    if(m_BlkDn_sm == eBlkDn_CFM_PRESEND) // buffer was full last time, so try again
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_OK_PRESEND) // buffer was full last time, so try again
     {
-        blk_dn_startSend_Dcfm_OK();
+        blk_dn_startSend_Dcfm_OK(p_app_UD);
     }
     else
-    if(m_BlkDn_sm == eBlkDn_CFM_SEND) // we didn't get a write done
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_NG_PRESEND) // buffer was full last time, so try again
     {
-        blk_dn_startSend_Dcfm_OK();
+        blk_dn_startSend_Dcfm_NG(p_app_UD);
     }
     else
-    if(m_BlkDn_sm == eBlkDn_CFM_SENT)
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_OK_SEND) // we didn't get a write done
+    {
+        blk_dn_startSend_Dcfm_OK(p_app_UD);
+    }
+    else
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_NG_SEND) // we didn't get a write done
+    {
+        blk_dn_startSend_Dcfm_NG(p_app_UD);
+    }
+    else
+    if(p_app_UD->m_BlkDn_sm == eBlkDn_CFM_SENT)
     {
     }
     else
     {
     }
-#endif
+}
+
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+PUBLIC uint32_t app_ud2_D_onBleConnect(app_ud2_t *p_app_UD)
+{
+    return(0);
+}
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+PUBLIC uint32_t app_ud2_D_onBleDisconnect(app_ud2_t *p_app_UD)
+{
+    BlkDn_timer_stop();
+    p_app_UD->m_BlkDn_sm = eBlkDn_WAIT_CMD;
+    return(0);
 }
 

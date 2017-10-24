@@ -234,9 +234,6 @@ void ma_adc_config(void);
 void ma_uart_Init(void);
 void ma_uart_Deinit(void);
 
-//TODOT #include "app_tuds.h"
-//int callThisWhenUartPacketForBleIsRecieved(void); //ma_join.c
-//int callThisWhenBlePacketIsRecieved(app_tuds_evt_t * p_app_tuds_event);  //ma_join.c
 
 // ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_
 // ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_ ma_
