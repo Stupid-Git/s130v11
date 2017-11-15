@@ -24,7 +24,8 @@
 //#include "core_cm0.h"  //NVIC_ClearPendingIRQ
 #include "nrf51.h"
 
-#include "debug_etc.h"
+#define DBGPRINTF_ALLOW 1
+#include "dbg_etc.h"
 
 
 // [[1]]

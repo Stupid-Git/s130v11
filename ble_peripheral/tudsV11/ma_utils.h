@@ -9,12 +9,12 @@ extern "C" {
 	
     
 
-int32_t cb_push( uint8_t data_byte, uint8_t* buffer, uint16_t rdPtr, uint16_t* pwrPtr, uint16_t capacity );
-int32_t cb_pop( uint8_t* pdata_byte, uint8_t* buffer, uint16_t* prdPtr, uint16_t wrPtr, uint16_t capacity );
-int32_t cb_peek( uint8_t* pdata_byte, uint8_t* buffer, uint16_t rdPtr, uint16_t wrPtr );
-int32_t cb_count( uint16_t rdPtr, uint16_t wrPtr, uint16_t capacity );
+//static int32_t cb_push( uint8_t data_byte, uint8_t* buffer, uint16_t rdPtr, uint16_t* pwrPtr, uint16_t capacity );
+//static int32_t cb_pop( uint8_t* pdata_byte, uint8_t* buffer, uint16_t* prdPtr, uint16_t wrPtr, uint16_t capacity );
+//static int32_t cb_peek( uint8_t* pdata_byte, uint8_t* buffer, uint16_t rdPtr, uint16_t wrPtr );
+//static int32_t cb_count( uint16_t rdPtr, uint16_t wrPtr, uint16_t capacity );
 
-int32_t cb_delete_range( uint8_t* buffer, uint16_t startPtr, uint16_t endPtr, uint16_t capacity );
+//int32_t cb_delete_range( uint8_t* buffer, uint16_t startPtr, uint16_t endPtr, uint16_t capacity );
 
 struct cb16_s
 {
@@ -48,7 +48,7 @@ int32_t cb16_pop( cb16_t*cb , uint8_t* pdata_byte );
 int32_t cb16_peek( cb16_t*cb, uint8_t* pdata_byte );
 int32_t cb16_count( cb16_t*cb );
 
-int32_t cb16_delete_range( cb16_t*cb, uint16_t startPtr, uint16_t endPtr);
+//int32_t cb16_delete_range( cb16_t*cb, uint16_t startPtr, uint16_t endPtr);
 int32_t cb16_clear( cb16_t*cb );
 
 

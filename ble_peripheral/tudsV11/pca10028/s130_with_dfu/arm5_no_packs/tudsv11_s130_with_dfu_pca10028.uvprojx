@@ -10,7 +10,7 @@
       <TargetName>nrf51422_xxac_s130</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060183::V5.06 update 2 (build 183)::ARMCC</pCCUsed>
+      <pCCUsed>5060422::V5.06 update 4 (build 422)::ARMCC</pCCUsed>
       <TargetOption>
         <TargetCommonOption>
           <Device>nRF51422_xxAC</Device>
@@ -2534,19 +2534,14 @@
               <FilePath>..\..\..\myapp.h</FilePath>
             </File>
             <File>
-              <FileName>debug_etc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\debug_etc.h</FilePath>
+              <FileName>dbg_etc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\dbg_etc.c</FilePath>
             </File>
             <File>
-              <FileName>debug_etc.c</FileName>
+              <FileName>dbg_spi.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\debug_etc.c</FilePath>
-            </File>
-            <File>
-              <FileName>sdo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\sdo.c</FilePath>
+              <FilePath>..\..\..\dbg_spi.c</FilePath>
             </File>
             <File>
               <FileName>ble_tuds.c</FileName>
@@ -2554,19 +2549,19 @@
               <FilePath>..\..\..\ble_tuds.c</FilePath>
             </File>
             <File>
-              <FileName>app_tuds_d.c</FileName>
+              <FileName>ma_tuds.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\app_tuds_d.c</FilePath>
+              <FilePath>..\..\..\ma_tuds.c</FilePath>
             </File>
             <File>
-              <FileName>app_tuds_u.c</FileName>
+              <FileName>ma_tuds_d.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\app_tuds_u.c</FilePath>
+              <FilePath>..\..\..\ma_tuds_d.c</FilePath>
             </File>
             <File>
-              <FileName>app_tuds.c</FileName>
+              <FileName>ma_tuds_u.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\app_tuds.c</FilePath>
+              <FilePath>..\..\..\ma_tuds_u.c</FilePath>
             </File>
             <File>
               <FileName>ma_join.c</FileName>
@@ -5066,19 +5061,14 @@
               <FilePath>..\..\..\myapp.h</FilePath>
             </File>
             <File>
-              <FileName>debug_etc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\debug_etc.h</FilePath>
+              <FileName>dbg_etc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\dbg_etc.c</FilePath>
             </File>
             <File>
-              <FileName>debug_etc.c</FileName>
+              <FileName>dbg_spi.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\debug_etc.c</FilePath>
-            </File>
-            <File>
-              <FileName>sdo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\sdo.c</FilePath>
+              <FilePath>..\..\..\dbg_spi.c</FilePath>
             </File>
             <File>
               <FileName>ble_tuds.c</FileName>
@@ -5086,19 +5076,19 @@
               <FilePath>..\..\..\ble_tuds.c</FilePath>
             </File>
             <File>
-              <FileName>app_tuds_d.c</FileName>
+              <FileName>ma_tuds.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\app_tuds_d.c</FilePath>
+              <FilePath>..\..\..\ma_tuds.c</FilePath>
             </File>
             <File>
-              <FileName>app_tuds_u.c</FileName>
+              <FileName>ma_tuds_d.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\app_tuds_u.c</FilePath>
+              <FilePath>..\..\..\ma_tuds_d.c</FilePath>
             </File>
             <File>
-              <FileName>app_tuds.c</FileName>
+              <FileName>ma_tuds_u.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\app_tuds.c</FilePath>
+              <FilePath>..\..\..\ma_tuds_u.c</FilePath>
             </File>
             <File>
               <FileName>ma_join.c</FileName>
@@ -5610,7 +5600,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>4</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -5765,7 +5755,7 @@
                   <RVCTZI>0</RVCTZI>
                   <RVCTOtherData>0</RVCTOtherData>
                   <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>1</IncludeInBuild>
+                  <IncludeInBuild>0</IncludeInBuild>
                   <AlwaysBuild>2</AlwaysBuild>
                   <GenerateAssemblyFile>2</GenerateAssemblyFile>
                   <AssembleAssemblyFile>2</AssembleAssemblyFile>
@@ -5820,7 +5810,7 @@
                   <RVCTZI>0</RVCTZI>
                   <RVCTOtherData>0</RVCTOtherData>
                   <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>1</IncludeInBuild>
+                  <IncludeInBuild>0</IncludeInBuild>
                   <AlwaysBuild>2</AlwaysBuild>
                   <GenerateAssemblyFile>2</GenerateAssemblyFile>
                   <AssembleAssemblyFile>2</AssembleAssemblyFile>
@@ -7902,19 +7892,14 @@
               <FilePath>..\..\..\myapp.h</FilePath>
             </File>
             <File>
-              <FileName>debug_etc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\debug_etc.h</FilePath>
+              <FileName>dbg_etc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\dbg_etc.c</FilePath>
             </File>
             <File>
-              <FileName>debug_etc.c</FileName>
+              <FileName>dbg_spi.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\debug_etc.c</FilePath>
-            </File>
-            <File>
-              <FileName>sdo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\sdo.c</FilePath>
+              <FilePath>..\..\..\dbg_spi.c</FilePath>
             </File>
             <File>
               <FileName>ble_tuds.c</FileName>
@@ -7972,19 +7957,19 @@
               </FileOption>
             </File>
             <File>
-              <FileName>app_tuds_d.c</FileName>
+              <FileName>ma_tuds.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\app_tuds_d.c</FilePath>
+              <FilePath>..\..\..\ma_tuds.c</FilePath>
             </File>
             <File>
-              <FileName>app_tuds_u.c</FileName>
+              <FileName>ma_tuds_d.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\app_tuds_u.c</FilePath>
+              <FilePath>..\..\..\ma_tuds_d.c</FilePath>
             </File>
             <File>
-              <FileName>app_tuds.c</FileName>
+              <FileName>ma_tuds_u.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\app_tuds.c</FilePath>
+              <FilePath>..\..\..\ma_tuds_u.c</FilePath>
             </File>
             <File>
               <FileName>ma_join.c</FileName>

@@ -5,7 +5,7 @@
 
 #include "myapp.h"
 
-
+#define PUBLIC 
 
 //=============================================================================
 //=============================================================================
@@ -24,7 +24,7 @@ uint8_t mg_ManufacturerSpecific_rsp26[26];
 uint8_t mg_ShortenedName_rsp26[26+2];
 
 
-void mg_ManufacturerSpecific_rsp26_setInitialValue(void)
+PUBLIC void mg_ManufacturerSpecific_rsp26_setInitialValue(void)
 {
     int i;
     for(i=0;i<26;i++)
@@ -35,7 +35,7 @@ void mg_ManufacturerSpecific_rsp26_setInitialValue(void)
     mg_ManufacturerSpecific_rsp26[1] = 0xFF;
 }
 
-bool mg_ShortenedName_rsp26_IsUnchanged(char * device_name)
+static bool mg_ShortenedName_rsp26_IsUnchanged(char * device_name)
 {
     int i;
     if( device_name == 0) // null pointer
@@ -61,7 +61,7 @@ bool mg_ShortenedName_rsp26_IsUnchanged(char * device_name)
     return(true);
 }
 
-void mg_ShortenedName_rsp26_set(char * device_name)
+PUBLIC void mg_ShortenedName_rsp26_set(char * device_name)
 {
     int i;
     for(i=0;i<26 + 2;i++)
@@ -82,7 +82,7 @@ void mg_ShortenedName_rsp26_set(char * device_name)
     
 }
 
-bool mg_ManufacturerSpecific_rsp26_IsUpdated(uint8_t * buffer) 
+static bool mg_ManufacturerSpecific_rsp26_IsUpdated(uint8_t * buffer) 
 {  
     int i;
     for( i=35; i<61;i++)
@@ -100,7 +100,7 @@ bool mg_ManufacturerSpecific_rsp26_IsUpdated(uint8_t * buffer)
     return(true);
 }
 
-int make_req_BLN( be_t *be_Req )
+PUBLIC int make_req_BLN( be_t *be_Req )
 {
     uint16_t crc;
     
@@ -120,7 +120,7 @@ int make_req_BLN( be_t *be_Req )
     return(0);
 }
 
-int proc_rsp_BLN( be_t *be_Req,  be_t *be_Rsp )
+PUBLIC int proc_rsp_BLN( be_t *be_Req,  be_t *be_Rsp )
 {
     //int i;
 
@@ -158,7 +158,7 @@ int proc_rsp_BLN( be_t *be_Req,  be_t *be_Rsp )
     return(0);
 }
 
-int proc_timeout_BLN( be_t *be_Req,  be_t *be_Rsp )
+PUBLIC int proc_timeout_BLN( be_t *be_Req,  be_t *be_Rsp )
 {
     dbgPrint("\r\nproc_timeout_BLN");
 
@@ -186,7 +186,7 @@ static uint32_t bln_cnt = 0;
 extern uint32_t mg_12_9E00_rate_inSeconds;// = 0;
 
 
-void bln_proc(int param) // ref adc_proc(int param) blp_proc(int param)
+PUBLIC void bln_proc(int param) // ref adc_proc(int param) blp_proc(int param)
 {
     static bool bForceSet = false;
     

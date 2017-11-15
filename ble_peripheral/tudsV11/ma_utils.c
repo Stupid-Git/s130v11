@@ -6,7 +6,7 @@
 
 
 
-int32_t cb_push( uint8_t data_byte, uint8_t* buffer, uint16_t rdPtr, uint16_t* pwrPtr, uint16_t capacity )
+static int32_t cb_push( uint8_t data_byte, uint8_t* buffer, uint16_t rdPtr, uint16_t* pwrPtr, uint16_t capacity )
 {
     int next_wp;
     next_wp = *pwrPtr + 1;
@@ -20,7 +20,7 @@ int32_t cb_push( uint8_t data_byte, uint8_t* buffer, uint16_t rdPtr, uint16_t* p
     return(1);
 }
 
-int32_t cb_pop( uint8_t* pdata_byte, uint8_t* buffer, uint16_t* prdPtr, uint16_t wrPtr, uint16_t capacity )
+static int32_t cb_pop( uint8_t* pdata_byte, uint8_t* buffer, uint16_t* prdPtr, uint16_t wrPtr, uint16_t capacity )
 {
     if( *prdPtr == wrPtr ) //Empty
         return(0);
@@ -32,7 +32,7 @@ int32_t cb_pop( uint8_t* pdata_byte, uint8_t* buffer, uint16_t* prdPtr, uint16_t
     return(1);
 }
 
-int32_t cb_peek( uint8_t* pdata_byte, uint8_t* buffer, uint16_t rdPtr, uint16_t wrPtr )
+static int32_t cb_peek( uint8_t* pdata_byte, uint8_t* buffer, uint16_t rdPtr, uint16_t wrPtr )
 {
     if( rdPtr == wrPtr ) //Empty
         return(0);
@@ -41,7 +41,7 @@ int32_t cb_peek( uint8_t* pdata_byte, uint8_t* buffer, uint16_t rdPtr, uint16_t 
 }
 
  
-int32_t cb_available(uint16_t rdPtr, uint16_t wrPtr, uint16_t capacity)
+static int32_t cb_available(uint16_t rdPtr, uint16_t wrPtr, uint16_t capacity)
 {
     int32_t size1;
     int32_t size2;
@@ -66,7 +66,7 @@ int32_t cb_available(uint16_t rdPtr, uint16_t wrPtr, uint16_t capacity)
     return(size);
 }
 
-int32_t cb_count( uint16_t rdPtr, uint16_t wrPtr, uint16_t capacity )
+static int32_t cb_count( uint16_t rdPtr, uint16_t wrPtr, uint16_t capacity )
 {
     int32_t size1;
     int32_t size2;
@@ -91,10 +91,10 @@ int32_t cb_count( uint16_t rdPtr, uint16_t wrPtr, uint16_t capacity )
     return(size);
 }
 
-int32_t cb_delete_range( uint8_t* buffer, uint16_t startPtr, uint16_t stop, uint16_t capacity )
-{
-    return(-1);
-}
+//int32_t cb_delete_range( uint8_t* buffer, uint16_t startPtr, uint16_t stop, uint16_t capacity )
+//{
+//    return(-1);
+//}
  
 
 
@@ -173,10 +173,10 @@ int32_t cb16_count( cb16_t*cb )
     return( cb_count(cb->rdPtr, cb->wrPtr, cb->capacity) );
 }
 
-int32_t cb16_delete_range( cb16_t*cb, uint16_t startPtr, uint16_t endPtr)
-{
-    return( cb_delete_range( cb->buffer, startPtr, endPtr, cb->capacity) );
-}
+//int32_t cb16_delete_range( cb16_t*cb, uint16_t startPtr, uint16_t endPtr)
+//{
+//    return( cb_delete_range( cb->buffer, startPtr, endPtr, cb->capacity) );
+//}
 
 int32_t cb16_clear( cb16_t*cb )
 {

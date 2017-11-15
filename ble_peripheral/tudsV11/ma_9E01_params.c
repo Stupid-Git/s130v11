@@ -8,6 +8,7 @@
 
 #include "ma_adc.h"
 
+#define PUBLIC 
 
 //=============================================================================
 //=============================================================================
@@ -40,7 +41,7 @@ static uint32_t blp_rate = 60;
 void Update_P7_P8_ticks_from_mg7_mg8(void);
 void WakePin_Release(char *S); //void  WakePin_Release(void);
 
-int make_req_BLP( be_t *be_Req )
+PUBLIC int make_req_BLP( be_t *be_Req )
 {
     uint16_t crc;
     
@@ -63,7 +64,7 @@ int make_req_BLP( be_t *be_Req )
 
 
 
-int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
+PUBLIC int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
 {
     dbgPrint("\r\nproc_rsp_BLP_01");
     
@@ -91,7 +92,6 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
     mg_10_loadADC      = be_Rsp->buffer[10];
     mg_11_power        = (int8_t)be_Rsp->buffer[11];
     mg_12_9E00_rate    = be_Rsp->buffer[12];
-
 
     if ((mg_12_9E00_rate == 0) && (mg_9_ADC_rate == 0))
     {
@@ -271,7 +271,7 @@ int proc_rsp_BLP( be_t *be_Req,  be_t *be_Rsp )
     return(0);
 }
 
-int proc_timeout_BLP( be_t *be_Req,  be_t *be_Rsp )
+PUBLIC int proc_timeout_BLP( be_t *be_Req,  be_t *be_Rsp )
 {
     dbgPrint("\r\nproc_timeout_BLP");
     blp_proc(BLP_PROC_UNPARK);
@@ -296,7 +296,7 @@ static uint32_t blp_cnt = 0;
 //#define BLP_NORM_RATE  0 //70
 
 
-void blp_proc(int param)
+PUBLIC void blp_proc(int param)
 {
     if(param == BLP_PROC_INIT_TRIGGER) // Basically called on power up
     {

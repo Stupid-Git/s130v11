@@ -1,88 +1,150 @@
 
-#include "myapp.h"
+#include "ma_join.h"
 
-void BlkDn_unlockStateMachine(void);
-extern  uint8_t m_blkDn_buf[];
-extern  uint16_t m_blkDn_len;
+//#include "ma_tuds.h"
 
-void BlkUp_Go( uint8_t *pkt, uint16_t len);
-
-
-//#include "app_tuds.h"
-
+#define PUBLIC 
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 // DN DN DN DN DN DN DN DN DN DN DN DN DN DN DN DN DN DN DN DN DN DN DN DN DN
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int callThisWhenBlePacketIsRecieved(app_tuds_evt_t * p_app_tuds_event)
-{
-    switch( p_app_tuds_event->evt_type )
-    {
-    case APP_TUDS_RX_PKT_0: // Dcmd[1,1] ... packet received event
-        break;
-    case APP_TUDS_RX_PKT_1: // Dcmd[1,2] event
-        break;
-    }
-    
-    dbgPrint("\r\nOn_Dn_packetAvailable");
-    dbgPrintf("\r\nRxLen = %d\n", m_blkDn_len - 2);
-   
-   
-    uniEvent_t LEvt;
-    LEvt.evtType = evt_bleMaster_trigger;
-    core_thread_QueueSend(&LEvt); // ..._QueueSendFromISR( ... )
+static ma_tuds_t *LOCAL_TMP_p_ma_tuds = 0;
 
-    
-    BlkDn_unlockStateMachine(); // Tell the state machine its OK to receive the next command
-    return(0);
-}
-
-
-
-int make_req_BLE( be_t *be_Req )
+PUBLIC int make_req_BLE( be_t *be_Req )
 {
     uint16_t i;
     
+    uint8_t  *p_buf = LOCAL_TMP_p_ma_tuds->m_blkDn_buf; //WWRONG
+    uint16_t len    = LOCAL_TMP_p_ma_tuds->m_blkDn_len; //WWRONG
+    
+    // Copy the buffer and the length variable
     be_Req->rdPtr = 0;
-    be_Req->wrPtr = m_blkDn_len - 2;
-    be_Req->length = m_blkDn_len - 2;
+    be_Req->wrPtr = len - 2;
+    be_Req->length = len - 2;
     for( i=0 ; i<be_Req->length; i++)
     {
-        be_Req->buffer[i] = m_blkDn_buf[i];
+        be_Req->buffer[i] = p_buf[i];
     }
+   
+    //ma_tuds_Dn_AllowNextPacket(LOCAL_TMP_p_ma_tuds); //Have copied Data, so is now finished with BlkDn data
+    
     return(0);
 }
 
 
+static void join_blkDn_DnEventHandler(ma_tuds_t *p_ma_tuds, eBlkDn_EV_t event, void* thing)
+{
+    switch(event)
+    {
+        case eBlkDn_EV_RXDONE:
+            dbgPrint("\r\nOn_Dn_packetAvailable");
+            //dbgPrintf("\r\nRxLen = %d\n", m_blkDn_len - 2);
+        
+            LOCAL_TMP_p_ma_tuds = p_ma_tuds; // we could init/update our local copy here
+
+            //cpb_BLE.pending = true;
+            //cpb_BLE.processing = false;
+            /*
+            if( cpb_BLE.pending == true) 
+            {
+                return;
+            }
+            */
+        
+            uniEvent_t LEvt;
+            LEvt.evtType = evt_bleMaster_trigger;
+            core_thread_QueueSend(&LEvt); // ..._QueueSendFromISR( ... )    
+            
+            break;
+        
+        case eBlkDn_EV_CMD12:
+            break;
+    }
+}
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 // UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int callThisWhenUartPacketForBleIsRecieved(void)
+static void join_blkUp_UpEventHandler(ma_tuds_t *p_ma_tuds, eBlkUp_EV_t event, void* thing)
 {
-    //BlkUp_Go( m_curr_beUrx->buffer, m_curr_beUrx->length); //be_UB
+    switch(event)
+    {
+        // The Up Machine has finished sending the packet we got from the UART
+        // so we can release the packet
+        case eBlkUp_EV_TXDONE:
+            // TODO? Free up  be_UB.buffer  so uart can write to it again
+            break;
+        
+        // The Up Machine has failed to send the packet we got from the UART
+        case eBlkUp_EV_TXFAILED:
+            break;
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Callbacks from Uart for requests from BLE
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// process the response from the UART
+//-----------------------------------------------------------------------------
+PUBLIC int proc_rsp_BLE( be_t *be_Req,  be_t *be_Rsp )
+{
+    //dbgPrint("\r\nproc_rsp_BLE");
+    int rv;
     dbgPrintf("\r\nUB_len = %d", be_UB.length);
     dbgPrintf("\r\nUB[0] = %02x %02x %02x %02x", be_UB.buffer[0], be_UB.buffer[1], be_UB.buffer[2], be_UB.buffer[3]);
 
-
-    BlkUp_Go( be_UB.buffer, be_UB.length); //be_UB
+    ma_tuds_Dn_AllowNextPacket(LOCAL_TMP_p_ma_tuds); //UART TxRx Done, so is now finished with BlkDn data
+    
+    rv = ma_tuds_U_StartSendPacket(LOCAL_TMP_p_ma_tuds,  be_UB.buffer, be_UB.length);
+    if( rv != 0)
+    {
+        // Failed, but just ignore failures
+    }
     return(0);
 }
 
-int proc_rsp_BLE( be_t *be_Req,  be_t *be_Rsp )
-{
-    //dbgPrint("\r\nproc_rsp_BLE");
-    callThisWhenUartPacketForBleIsRecieved(); //TODO  BlkUp_Go( m_curr_beUrx->buffer, m_curr_beUrx->length); //be_UB
-    return(0);
-}
-
-int proc_timeout_BLE( be_t *be_Req,  be_t *be_Rsp )
+//-----------------------------------------------------------------------------
+// process the UART wait for response timeout event
+//-----------------------------------------------------------------------------
+PUBLIC int proc_timeout_BLE( be_t *be_Req,  be_t *be_Rsp )
 {
     //dbgPrint("\r\nproc_timeout_BLE");
+    // Since we have no data to send, just return and continue.
+    //
+    //   The Application on the host machine (our client) will have to timeout
+    // and retry the command again.
+    
+    ma_tuds_Dn_AllowNextPacket(LOCAL_TMP_p_ma_tuds); //UART Timed Out, so is now finished with BlkDn data
+    
     return(0);
 }
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// INIT INIT INIT INIT INIT INIT INIT INIT INIT INIT INIT INIT INIT INIT INIT
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Connect this 'join' section to the 'ma_tuds'
+//-----------------------------------------------------------------------------
+PUBLIC void join_Init(ma_tuds_t *p_ma_tuds)
+{
+    LOCAL_TMP_p_ma_tuds = p_ma_tuds;
+    
+    ma_tuds_RegCb_DnEventHandler(p_ma_tuds, join_blkDn_DnEventHandler);
+    //p_ma_tuds->blkDn_DnEventHandler = join_blkDn_DnEventHandler;
+
+    ma_tuds_RegCb_UpEventHandler(p_ma_tuds, join_blkUp_UpEventHandler);
+    //p_ma_tuds->blkUp_UpEventHandler = join_blkUp_UpEventHandler;
+}
+
+
 

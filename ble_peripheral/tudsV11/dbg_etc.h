@@ -16,12 +16,11 @@ extern "C"
 // http://www.cplusplus.com/reference/cstdio/printf/
 // http://www.cplusplus.com/reference/cstdio/vprintf/
 
-
-#define  USE_PRINTF_OVER_SDO  0//1   
+#include "tudsapp_config.h" //for #define  APP_TD_SPIDGB_ENABLED  1/0
     
 
 //------------------------- NO Debug -------------------------
-#if (USE_PRINTF_OVER_SDO==0)
+#if (APP_TD_SPIDGB_ENABLED==0)
 static inline int dbgPrintf( const char * format, ... )
 {
     return(0);
@@ -34,15 +33,26 @@ static inline int dbgPrintf( const char * format, ... )
 //------------------------- YES Debug -------------------------
 #else
 
-void sdo_Init(void);
-#define dbgPrint_Init sdo_Init
+void dbgSpi_Init(void);
+void dbgSpi_Deinit(void);
+int  dbgSpi_AppendText(const char * str);
 
-int dbgPrintf( const char * format, ... );
+#define dbgPrint_Init dbgSpi_Init
 
-//int dbgPrint( const char * str );
-int sdo_AppendText( const char * str );
-#define dbgPrint(x) sdo_AppendText(x)
+#if(DBGPRINTF_ALLOW==0) //-------------------------------------
+static inline int dbgPrintf( const char * format, ... )
+{
+    return(0);
+}
+#define dbgPrint( X )
+#else //-------------------------------------------------------
+int     dbgPrintf( const char * format, ... );
+#define dbgPrint(x) dbgSpi_AppendText(x)
+#endif //------------------------------------------------------
+
+
 const char * get_ble_evt_str( uint8_t evt_id);
+
 #endif
 //------------------------- End Debug -------------------------
         

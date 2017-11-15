@@ -8,6 +8,8 @@
 
 #include "ma_adc.h"
 
+#define PUBLIC 
+
 #if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 void sdoTE( char * S);
@@ -21,7 +23,6 @@ void sdoTE( char * S);
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#if USE_ADCON_TIMER
 APP_TIMER_DEF(m_battLoad_timer_id);
 
 static void battLoad_timeout_handler(void * p_context) // Aim for around 1ms
@@ -53,7 +54,7 @@ static void battLoad_timeout_handler(void * p_context) // Aim for around 1ms
 //static uint32_t m_app_ticks_per_100ms;
 //#define BSP_MS_TO_TICK(MS) (m_app_ticks_per_100ms * (MS / 100))
 
-uint32_t battLoad_timer_init(void)
+PUBLIC uint32_t battLoad_timer_init(void)
 {
     uint32_t err_code;
 
@@ -68,7 +69,7 @@ uint32_t battLoad_timer_init(void)
 }
 
 
-uint32_t battLoad_timer_start(uint32_t timeout_ticks)
+static uint32_t battLoad_timer_start(uint32_t timeout_ticks)
 {
     uint32_t err_code;
 
@@ -88,7 +89,7 @@ uint32_t battLoad_timer_start(uint32_t timeout_ticks)
     return(err_code);
 }
 
-uint32_t battLoad_timer_stop(void)
+static uint32_t battLoad_timer_stop(void)
 {
     uint32_t err_code;
     // Stop timer
@@ -101,14 +102,8 @@ uint32_t battLoad_timer_stop(void)
     return(err_code);
 }
 
-#endif
 
 
-
-
-
-
-volatile int32_t adc_sample;
 
 
 void pinsBatt_Init(void);
@@ -142,7 +137,7 @@ static void BattPins_OFF(void)
 #include "nrf_drv_config.h"
 #endif
 
-void ma_adc_config(void)
+PUBLIC void ma_adc_config(void)
 {
 #if !APP_TD_BATT_FAKE_ADC
     const nrf_adc_config_t nrf_adc_config = NRF_ADC_CONFIG_DEFAULT;
@@ -166,8 +161,9 @@ void ma_adc_config(void)
         https://devzone.nordicsemi.com/question/1771/high-sample-rate-with-adc-and-softdevice/
 */
 
+static volatile int32_t adc_sample;
 #if !APP_TD_BATT_FAKE_ADC
-void ADC_IRQHandler(void)
+PUBLIC void ADC_IRQHandler(void)
 {
     nrf_adc_conversion_event_clean();
 
@@ -200,7 +196,7 @@ static uint8_t cnt_10s = 0;
 static uint8_t cnt_10m = 0;
 
 
-int adc_count()
+static int adc_count()
 {
     int adcMeasureType = 0;
     
@@ -276,14 +272,14 @@ ADC_entity_t m_ADC_ENT_H;
 eNADC_mode NADC_mode;
 
 /* not used*/
-void NADC_set_ADC_L_GO(void)
+PUBLIC void NADC_set_ADC_L_GO(void)
 {
     if( m_ADC_ENT_L.state == NADC_state_IDLE)
     {
         m_ADC_ENT_L.state = NADC_state_START;
     }
 }
-void NADC_set_ADC_H_GO(void)
+PUBLIC void NADC_set_ADC_H_GO(void)
 {
     if( m_ADC_ENT_H.state == NADC_state_IDLE)
     {
@@ -292,7 +288,7 @@ void NADC_set_ADC_H_GO(void)
 }
 /*not used */
 
-int NADC_proc( eNADC_action action)
+PUBLIC int NADC_proc( eNADC_action action)
 {
     
     dbgPrintf("\r\n               NADC_proc %d", action);
@@ -562,7 +558,7 @@ int NADC_proc( eNADC_action action)
 
 
 
-int proc_timeout_ADC( be_t *be_Req,  be_t *be_Rsp )
+PUBLIC int proc_timeout_ADC( be_t *be_Req,  be_t *be_Rsp )
 {
     dbgPrint("\r\nproc_timeout_ADC_02");
     NADC_proc(NADC_action_9E_TIMEOUT);
@@ -570,7 +566,7 @@ int proc_timeout_ADC( be_t *be_Req,  be_t *be_Rsp )
 }
 
 
-int proc_rsp_ADC( be_t *be_Req,  be_t *be_Rsp )
+PUBLIC int proc_rsp_ADC( be_t *be_Req,  be_t *be_Rsp )
 {
     dbgPrint("\r\nproc_rsp_ADC_02");
     NADC_proc(NADC_action_9E_DONE);
@@ -579,7 +575,7 @@ int proc_rsp_ADC( be_t *be_Req,  be_t *be_Rsp )
 
 
 
-int make_req_ADC( be_t *be_Req )
+PUBLIC int make_req_ADC( be_t *be_Req )
 {
     if( m_ADC_ENT_L.state == NADC_state_DONE_ADC)
     {

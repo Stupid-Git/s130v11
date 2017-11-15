@@ -45,11 +45,6 @@ static int32_t  proc01_checkPacketComplete(uint8_t *buf, uint16_t rp, uint16_t w
 //dbgPrintf("\r\nAALLLL");
 
     
-#if _ALLOW_REVERSE_CRC
-    uint16_t crcR;
-    crcR =  buf[rp + 5 + size + 1] << 8; // CRC LSB first !!!!!!!!!!!! REVERSE
-    crcR += buf[rp + 5 + size + 0];
-#endif
     crc =  buf[rp + 5 + size + 0] << 8; // CRC MSB first
     crc += buf[rp + 5 + size + 1];
     crc_calc = CRC_START_SEED; //0x0000;//0xFFFF;
@@ -57,10 +52,6 @@ static int32_t  proc01_checkPacketComplete(uint8_t *buf, uint16_t rp, uint16_t w
     
     if(crc == crc_calc)
         return(1);
-#if _ALLOW_REVERSE_CRC
-    if(crcR == crc_calc)
-        return(1);
-#endif
 
     dbgPrintf("\r\nBBAADD");
     dbgPrintf("\r\nrx   crc = 0x%04x", crc);
@@ -227,7 +218,7 @@ static int serialSync_data_event_process_uart_in(uint8_t b0)
 }
 
 //-----------------------------------------------------------------------------
-int DEVT_uartRxReady()
+static int DEVT_uartRxReady(void)
 {
     uint8_t  b0;
     uint32_t err_code;
@@ -262,6 +253,9 @@ void be_Cxx_Indicate_BufSend_Done(void);
 void be_Cxx_Indicate_BufSend_Started(void);
 static bool m_curr_beUtx_NowEmpty = false;
 
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
 bool ma_uart_packetTx_start(void)
 {
     uint32_t err_code;
@@ -296,14 +290,10 @@ bool ma_uart_packetTx_start(void)
 }
 
 
-
-    
-
-
-
-
 //-----------------------------------------------------------------------------
-int DEVT_uartTxEmpty()
+//
+//-----------------------------------------------------------------------------
+static int DEVT_uartTxEmpty(void)
 {
     uint32_t err_code;
     volatile uint8_t c;
@@ -360,8 +350,6 @@ int DEVT_uartTxEmpty()
 }
 
 
-
-
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
@@ -386,6 +374,9 @@ static void uart_thread_process_event(uniEvent_t *pEvt)
 }
 
 
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
 static void uart_thread_process_queue_item(void * p_event_data, uint16_t event_size)
 {
     //dbgPrint("\r\nPriorityThread -> ");
@@ -405,8 +396,6 @@ void uart_thread_QueueSend(uniEvent_t *pEvt)
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
-
-
 #include "myapp.h"
 #include "app_uart.h"
 

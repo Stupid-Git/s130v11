@@ -1,4 +1,6 @@
-#include "debug_etc.h"
+
+#define DBGPRINTF_ALLOW 1
+#include "dbg_etc.h"
 
 #include "ble_tuds.h"
 #include <string.h>
@@ -464,8 +466,7 @@ void ble_tuds_on_ble_evt(ble_tuds_t * p_tuds, ble_evt_t * p_ble_evt)
 
   //dbgPrintf("\r\n evt = %d,%x: ", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id);
     dbgPrintf("\r\n ble_tuds_on_ble_evt");
-    dbgPrintf("\r\n revt = %d, 0x%x, s = %s: ", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id, get_ble_evt_str(p_ble_evt->header.evt_id) );
-
+    dbgPrintf("\r\n evt = %d, 0x%x, s = %s: ", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id, get_ble_evt_str(p_ble_evt->header.evt_id) );
 
     switch (p_ble_evt->header.evt_id)
     {
@@ -511,6 +512,8 @@ uint32_t ble_tuds_init(ble_tuds_t * p_tuds, const ble_tuds_init_t * p_tuds_init)
 
     // Initialize the service structure.
     p_tuds->conn_handle              = BLE_CONN_HANDLE_INVALID;
+    //===== APP connection =====
+    p_tuds->parentContext            = p_tuds_init->parentContext;
     //===== DN =====
     p_tuds->Ddat_handler             = p_tuds_init->Ddat_handler;
     p_tuds->Dcmd_handler             = p_tuds_init->Dcmd_handler;

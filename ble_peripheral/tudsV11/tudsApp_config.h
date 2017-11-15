@@ -7,18 +7,28 @@
 #include "app_config.h"
 #endif
 
+//==========================================================
+// <h> T&D SPI Debug Output 
+//==========================================================
+// <q> APP_TD_SPIDGB_ENABLED  - Allow Debug Output through SPI port
+#ifndef APP_TD_SPIDGB_ENABLED
+#define APP_TD_SPIDGB_ENABLED 0
+#endif
+
+// </h> 
+
 
 //==========================================================
 // <h> app_ADC 
 //==========================================================
 // <q> APP_TD_BATT_ENABLED  - tdk_battMonService - Battery Monitoring Service
 #ifndef APP_TD_BATT_ENABLED
-#define APP_TD_BATT_ENABLED 1
+#define APP_TD_BATT_ENABLED 0
 #endif
 
 // <q> APP_TD_BATT_FAKE_ADC  - tdk_battMonService - Fake the ADC Result
 #ifndef APP_TD_BATT_FAKE_ADC
-#define APP_TD_BATT_FAKE_ADC 1
+#define APP_TD_BATT_FAKE_ADC 0
 #endif
 
 // </h> 

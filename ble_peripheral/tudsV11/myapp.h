@@ -7,7 +7,8 @@ extern "C"
 #endif
 
     
-#include "debug_etc.h"
+#define DBGPRINTF_ALLOW 1
+#include "dbg_etc.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -49,25 +50,13 @@ extern "C"
 
 //---------------------------------------------------------
 // Use NEW ADC scheme
-#define USE_NADC   1
+//OLD #define USE_NADC   1
 #define BOOT_V_LIMIT 2.60 // 2.50
-
-//---------------------------------------------------------
-// Timer to time the ON period for the ADC load
-#define USE_ADCON_TIMER    1
 
 
 //---------------------------------------------------------
 // Use CRC instead of checksum
-#define _USE_CRC  1 //0
-
-#if _USE_CRC
-#define _ALLOW_REVERSE_CRC  0 //0
-//uint16_t crc16_compute(uint8_t * p_data, uint16_t size, uint16_t * p_crc);
 #include "ma_utils.h"
-#endif
-
-
 
 //---------------------------------------------------------
 // Wake pin output to micro controller 
@@ -86,7 +75,7 @@ extern "C"
 // For debugging, for 9E command reponses to test values
 #define USE_FORCE_9E_5_TO_1  0       //  mg_5_dengen = 1; // Force No sleep_mode
 #define USE_FORCE_9E_6_ADV   0       //  if(mg_6_advX50ms >  20) mg_6_advX50ms =  20; // > 1000ms is too Slow ?
-#define USE_FORCE_9E_9_ADC   0//1       //  
+#define USE_FORCE_9E_9_ADC   0       //  
 
 
 
@@ -107,7 +96,7 @@ void autoTimeout_Start( uint32_t timeout );
 void bln_proc(int param);
 
 //-----------------------------------------------------------------------------
-// BLP - 0x9E_01 Parameter Get processing
+// BLP - 0x9E 0x01 Parameter Get processing
 #define BLP_PROC_INIT_TRIGGER    0
 #define BLP_PROC_TIMER_TICK      1
 #define BLP_PROC_UNPARK          2
@@ -118,7 +107,6 @@ void blp_proc(int param);
 //=============================================================================
 // TYPES
 
-
 typedef enum epktType
 {
     ePkt_Unknown,
@@ -127,7 +115,6 @@ typedef enum epktType
 //    ePkt_T2,
 //    ePkt_K2,
 } epktType_t;
-
 
 struct be_s;
 typedef struct be_s be_t;
@@ -148,16 +135,34 @@ typedef struct be_s
     uint32_t length;
 } be_t;
 
+//=============================================================================
+// predefines
+// Buffers
+extern           be_t  be_CUm;
+extern           be_t  be_UCm;
+
+extern           be_t  be_BU;
+extern volatile  be_t  be_UB;
+
+extern           be_t  be_Urx;
+
+extern volatile  be_t  *m_curr_beUrx;
+extern           be_t  *m_curr_beUtx;
 
 
+
+//-----------------------------------------------------------------------------
+// NANNY - A Grandmother to look after the power up after a brown out 
+//         sort of thing.
 void NANNY_call_after_9E_OFF_cmd(void);
-
 void prime_NANNY_OFF(void);
 void prime_NANNY_ON(void);
 void NANNY_normalBoot_schedule_9E_ON_cmd(void);
 
-
+//-----------------------------------------------------------------------------
+// A BLE Connection Status Flag
 extern bool m_bleIsConnected;
+
 
 //=============================================================================
 typedef enum eEvtType
@@ -200,28 +205,10 @@ typedef struct uniEvent_s
 } uniEvent_t;
 
 
-//=============================================================================
-// predefines
-// Buffers
-extern           be_t  be_CUm;
-extern           be_t  be_UCm;
-
-extern           be_t  be_BU;
-extern volatile  be_t  be_UB;
-
-extern           be_t  be_Urx;
-
-extern volatile  be_t  *m_curr_beUrx;
-extern           be_t  *m_curr_beUtx;
-
-
-void core_thread(void * arg);
-void uart_thread(void * arg);
-
 
 
 #include "ma_timers.h"
-#include "app_tuds.h"
+#include "ma_tuds.h"
 
 
 void ma_adc_config(void);
@@ -231,19 +218,13 @@ void ma_uart_Init(void);
 void ma_uart_Deinit(void);
 
 
-int DEVT_uartRxReady(void);
-int DEVT_uartTxEmpty(void);
-
-    
-
-bool ma_uart_packetTx_start(void);
-
-extern char m_s1[256];
-
 //-----------------------------------------------------------------------------
 // ma_uart.c
+
 void uart_thread_init(void);
 void uart_thread_QueueSend(uniEvent_t *pEvt);
+
+bool ma_uart_packetTx_start(void);
 
 void set_curr_beUrx_toStartPosition(void);
 

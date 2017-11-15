@@ -1,4 +1,5 @@
 
+#define DBGPRINTF_ALLOW 1
 #include "dbg_etc.h"
 
 #include "app_util_platform.h" //identifier "APP_IRQ_PRIORITY_LOW"
@@ -6,12 +7,8 @@
 
 #include "ma_timers.h" // for APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE
 
-#define DELAY_MS                 1000                   ///< Timer Delay in milli-seconds.
+//#define DELAY_MS                 1000                   ///< Timer Delay in milli-seconds.
 
-/** @def  TX_RX_MSG_LENGTH
- * number of bytes to transmit and receive. This amount of bytes will also be tested to see that
- * the received bytes from slave are the same as the transmitted bytes from the master */
-#define TX_RX_MSG_LENGTH         100
 typedef enum
 {
     #if (SPI0_ENABLED == 1)
@@ -31,7 +28,11 @@ typedef enum
     END_OF_TEST_SEQUENCE
 } spi_master_ex_state_t;
 
+
 #if (APP_TD_SPIDGB_ENABLED == 1)
+
+#define TX_RX_MSG_LENGTH         100
+
 static uint8_t m_tx_data_spi[TX_RX_MSG_LENGTH]; ///< SPI master TX buffer.
 static uint8_t m_rx_data_spi[TX_RX_MSG_LENGTH]; ///< SPI master RX buffer.
 
@@ -67,14 +68,14 @@ static bool     m_sdo_isInitialised = false;
 
 //static bool  skip_pop = false;
 
-void sdo_next(void);
+static void sdo_next(void);
 
 
 
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
-void sdo_master_0_event_handler(nrf_drv_spi_evt_t const * p_event)                          
+static void sdo_master_0_event_handler(nrf_drv_spi_evt_t const * p_event)                          
 {    
 #if (APP_TD_SPIDGB_ENABLED == 0)
     return;    
@@ -116,10 +117,160 @@ void sdo_master_0_event_handler(nrf_drv_spi_evt_t const * p_event)
 
 
 
+
+
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
-void sdo_Init(void)
+/* for test
+static void sdo_test(void)
+{
+#if (APP_TD_SPIDGB_ENABLED == 1)
+    nrf_drv_spi_t const * p_instance;
+    #if (SPI0_ENABLED == 1)
+    p_instance = &m_spi_master_0;
+    #endif
+    
+    uint16_t i;
+    uint16_t  len = KS_TX_RX_MSG_LENGTH;
+    for (i = 0; i < len; i++)
+    {
+        m_tx_data_spi[i] = 10+i;
+        m_rx_data_spi[i] = 0;
+    }
+   
+    uint32_t err_code = nrf_drv_spi_transfer(p_instance, m_tx_data_spi, len, m_rx_data_spi, len);
+    APP_ERROR_CHECK(err_code);
+#endif
+}
+*/
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+static void sdo_next(void)
+{
+#if (APP_TD_SPIDGB_ENABLED == 1)
+    nrf_drv_spi_t const * p_instance;
+    p_instance = &m_spi_master_0;
+
+    uint8_t data;
+    int32_t dataCount = cb16_count(m_sdo_Cb);
+    
+    if( dataCount == 0 )
+        return;
+    if( m_sdo_RTS == false )
+        return;
+    m_sdo_RTS = false;
+
+//nrf_gpio_pin_toggle(BSP_LED_3);
+    
+    if( dataCount < (KS_TX_RX_MSG_LENGTH - 1) )
+        m_tx_data_spi[0] = (uint8_t)dataCount;
+    else
+    {
+        m_tx_data_spi[0] = (uint8_t)(KS_TX_RX_MSG_LENGTH - 1);
+        dataCount = (KS_TX_RX_MSG_LENGTH - 1);
+    }
+    
+    uint16_t i;
+    /*A*/uint16_t  len = dataCount+1; //KS_TX_RX_MSG_LENGTH;
+    /*B*///uint16_t  len = KS_TX_RX_MSG_LENGTH;
+    for (i = 1; i < len; i++)
+    {
+        cb16_pop(m_sdo_Cb, &data);
+        m_tx_data_spi[i] = data;
+        m_rx_data_spi[i] = 0;
+    }
+   
+    /*A*/uint32_t err_code = nrf_drv_spi_transfer(p_instance, m_tx_data_spi, KS_TX_RX_MSG_LENGTH, m_rx_data_spi, KS_TX_RX_MSG_LENGTH);//len);
+    /*B*///uint32_t err_code = nrf_drv_spi_transfer(p_instance, m_tx_data_spi, len, m_rx_data_spi, len);
+    APP_ERROR_CHECK(err_code);
+//nrf_gpio_pin_toggle(BSP_LED_3);
+#endif
+
+}
+
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+#include <string.h>
+
+/* TESTING
+int dbgSpi_AppendText( const char * s )
+{
+#if (APP_TD_SPIDGB_ENABLED == 0)
+return(0);    
+#endif
+    int32_t r;
+    int len = strlen( s );
+    while( len-- > 0)
+    {
+        r = cb16_push( m_sdo_Cb, (uint8_t)*s++ );
+        if( r == 0 )
+            break;
+    }
+    sdo_next();
+}
+*/
+
+
+#define PUBLIC 
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+int dbgSpi_AppendText( const char * s )
+{
+#if (APP_TD_SPIDGB_ENABLED == 1)
+    //int32_t r;
+//nrf_gpio_pin_toggle(BSP_LED_3);
+    int len = strlen( s );
+//nrf_gpio_pin_toggle(BSP_LED_3);
+
+    //skip_pop = true;
+    // https://devzone.nordicsemi.com/question/39453/how-to-enable-and-disable-all-interrupts/
+    // ...  You can use the sd_nvic_critical_region_enter()/exit() functions to turn off all interrupts the softdevice isn't using. That is the most you can do. 
+    __disable_irq();
+    /*r = */cb16_push_n( m_sdo_Cb, (uint8_t*)s, len );
+    __enable_irq();
+    //m_sdo_RTS = true;
+    //skip_pop = false;
+    /*
+    while( len-- > 0)
+    {
+        r = cb16_push( m_sdo_Cb, (uint8_t)*s++ );
+        if( r == 0 )
+            break;
+    }
+    */
+//nrf_gpio_pin_toggle(BSP_LED_3);    
+    sdo_next();
+//nrf_gpio_pin_toggle(BSP_LED_3);
+    return(0);
+#else
+    return(0);
+#endif
+}
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+PUBLIC void dbgSpi_Deinit(void)
+{
+#if (APP_TD_SPIDGB_ENABLED == 0)
+    return;
+#else
+    nrf_drv_spi_uninit(&m_spi_master_0);
+    m_sdo_isInitialised = false;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+PUBLIC void dbgSpi_Init(void)
 {
 #if (APP_TD_SPIDGB_ENABLED == 0)
     return;    
@@ -166,144 +317,3 @@ void sdo_Init(void)
 #endif
    
 }
-
-//-----------------------------------------------------------------------------
-//
-//-----------------------------------------------------------------------------
-void sdo_Deinit(void)
-{
-#if (APP_TD_SPIDGB_ENABLED == 0)
-    return;
-#else
-    nrf_drv_spi_uninit(&m_spi_master_0);
-    m_sdo_isInitialised = false;
-#endif
-}
-
-
-//-----------------------------------------------------------------------------
-//
-//-----------------------------------------------------------------------------
-void sdo_test(void)
-{
-#if (APP_TD_SPIDGB_ENABLED == 0)
-    return;
-#else
-    nrf_drv_spi_t const * p_instance;
-    #if (SPI0_ENABLED == 1)
-    p_instance = &m_spi_master_0;
-    #endif
-    
-    uint16_t i;
-    uint16_t  len = KS_TX_RX_MSG_LENGTH;
-    for (i = 0; i < len; i++)
-    {
-        m_tx_data_spi[i] = 10+i;
-        m_rx_data_spi[i] = 0;
-    }
-   
-    uint32_t err_code = nrf_drv_spi_transfer(p_instance, m_tx_data_spi, len, m_rx_data_spi, len);
-    APP_ERROR_CHECK(err_code);
-#endif
-}
-
-
-void sdo_next(void)
-{
-#if (APP_TD_SPIDGB_ENABLED == 0)
-    return;
-#else
-    nrf_drv_spi_t const * p_instance;
-    p_instance = &m_spi_master_0;
-
-    uint8_t data;
-    int32_t dataCount = cb16_count(m_sdo_Cb);
-    
-    if( dataCount == 0 )
-        return;
-    if( m_sdo_RTS == false )
-        return;
-    m_sdo_RTS = false;
-
-//nrf_gpio_pin_toggle(BSP_LED_3);
-    
-    if( dataCount < (KS_TX_RX_MSG_LENGTH - 1) )
-        m_tx_data_spi[0] = (uint8_t)dataCount;
-    else
-    {
-        m_tx_data_spi[0] = (uint8_t)(KS_TX_RX_MSG_LENGTH - 1);
-        dataCount = (KS_TX_RX_MSG_LENGTH - 1);
-    }
-    
-    uint16_t i;
-    /*A*/uint16_t  len = dataCount+1; //KS_TX_RX_MSG_LENGTH;
-    /*B*///uint16_t  len = KS_TX_RX_MSG_LENGTH;
-    for (i = 1; i < len; i++)
-    {
-        cb16_pop(m_sdo_Cb, &data);
-        m_tx_data_spi[i] = data;
-        m_rx_data_spi[i] = 0;
-    }
-   
-    /*A*/uint32_t err_code = nrf_drv_spi_transfer(p_instance, m_tx_data_spi, KS_TX_RX_MSG_LENGTH, m_rx_data_spi, KS_TX_RX_MSG_LENGTH);//len);
-    /*B*///uint32_t err_code = nrf_drv_spi_transfer(p_instance, m_tx_data_spi, len, m_rx_data_spi, len);
-    APP_ERROR_CHECK(err_code);
-//nrf_gpio_pin_toggle(BSP_LED_3);
-#endif
-
-}
-
-#include <string.h>
-
-int sdo_AppendText( const char * s )
-{
-#if (APP_TD_SPIDGB_ENABLED == 0)
-    return(0);
-#else
-    //int32_t r;
-//nrf_gpio_pin_toggle(BSP_LED_3);
-    int len = strlen( s );
-//nrf_gpio_pin_toggle(BSP_LED_3);
-
-    //skip_pop = true;
-    // https://devzone.nordicsemi.com/question/39453/how-to-enable-and-disable-all-interrupts/
-    // ...  You can use the sd_nvic_critical_region_enter()/exit() functions to turn off all interrupts the softdevice isn't using. That is the most you can do. 
-    __disable_irq();
-    /*r = */cb16_push_n( m_sdo_Cb, (uint8_t*)s, len );
-    __enable_irq();
-    //m_sdo_RTS = true;
-    //skip_pop = false;
-    /*
-    while( len-- > 0)
-    {
-        r = cb16_push( m_sdo_Cb, (uint8_t)*s++ );
-        if( r == 0 )
-            break;
-    }
-    */
-//nrf_gpio_pin_toggle(BSP_LED_3);    
-    sdo_next();
-//nrf_gpio_pin_toggle(BSP_LED_3);
-    return(0);
-#endif
-}
-
-/* TESTING
-int sdo_AppendText_( const char * s )
-{
-#if (APP_TD_SPIDGB_ENABLED == 0)
-return(0);    
-#endif
-    int32_t r;
-    int len = strlen( s );
-    while( len-- > 0)
-    {
-        r = cb16_push( m_sdo_Cb, (uint8_t)*s++ );
-        if( r == 0 )
-            break;
-    }
-    
-    sdo_next();
-}
-*/
-

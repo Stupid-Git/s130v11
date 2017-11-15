@@ -1,5 +1,6 @@
 
-#include "debug_etc.h"
+#define DBGPRINTF_ALLOW 0
+#include "dbg_etc.h"
 
 //#include "app_scheduler.h"
 #include "priority_scheduler.h"

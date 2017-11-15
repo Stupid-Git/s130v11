@@ -45,6 +45,7 @@ int dbgPrint( const char *str )
     return(r);
 }
 */
+#endif //moved up REF:rttprintf 
 
 // from ble_ranges.h
 /*
@@ -70,6 +71,7 @@ int dbgPrint( const char *str )
 #include "ble.h"
 #include "ble_gap.h"
 #include "ble_gatts.h"
+
 
 const char * get_ble_evt_str( uint8_t evt_id)
 {
@@ -164,4 +166,4 @@ const char * get_ble_evt_str( uint8_t evt_id)
 }
 
 //------------------------- End Debug -------------------------
-#endif
+//moved up REF:rttprintf #endif

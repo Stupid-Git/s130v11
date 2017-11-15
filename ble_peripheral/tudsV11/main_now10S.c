@@ -35,7 +35,7 @@
 #include "ble_advertising.h"
 
 #if USE_TUDS
-#include "app_tuds.h"
+#include "ma_tuds.h"
 #endif
 
 #if USE_DIS
@@ -199,10 +199,8 @@ STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                 
 
 
 #if USE_TUDS
-ble_tuds_t  m_ble_tuds;                                  // Structure to identify the BLKUP Service.
-uint32_t timers_init_tuds_part(void);
-void services_init_tuds_part(void);
-void application_timers_start_tuds_part(void);
+ble_tuds_t  m_ble_tuds;                                  // Structure to identify the ble_tuds Service.
+ma_tuds_t  m_ma_tuds;                                  // Structure to identify the ma_tuds Application.
 #endif
 
 
@@ -329,15 +327,13 @@ static void timers_init()
 {
     GP_timer_init();         // Init the General Purpose 1-tick per second timer
 #if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#if USE_ADCON_TIMER
     battLoad_timer_init();      // Init the on-shot timer for Battery Load timer (for reading the ADC)
-#endif
 #endif // APP_TD_BATT_ENABLED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ma_uart_timer_init();    // Init the timer for Uart RxTimeout/Shutdown timing
     ma_holdoff_timer_init(); // Init the ... what is THIS timer ?!?
     
 #if USE_TUDS
-    timers_init_tuds_part();
+    ma_tuds_timer_init();
 #endif
 
     P7_timer_init();         // Init the Parameter 7 timer (micro-processor Wake Timing
@@ -438,8 +434,10 @@ static void advertising_stop(void)
     err_code = sd_ble_gap_adv_stop();
     APP_ERROR_CHECK(err_code);
 
+/* NOT_USING_BSP
     err_code = bsp_indication_set(BSP_INDICATE_IDLE);
     APP_ERROR_CHECK(err_code);
+NOT_USING_BSP */
 }
 
 
@@ -471,7 +469,7 @@ static void app_context_load(dm_handle_t const * p_handle)
             if ((err_code != NRF_SUCCESS) &&
                 (err_code != BLE_ERROR_INVALID_CONN_HANDLE) &&
                 (err_code != NRF_ERROR_INVALID_STATE) &&
-                (err_code != BLE_ERROR_NO_TX_PACKETS) && // was BLE_ERROR_NO_TX_BUFFERS ?error?
+                (err_code != BLE_ERROR_NO_TX_PACKETS) &&
                 (err_code != NRF_ERROR_BUSY) &&
                 (err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING))
             {
@@ -511,8 +509,10 @@ static void reset_prepare(void) //NANNY
         // Disconnect from peer.
         err_code = sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
         APP_ERROR_CHECK(err_code);
+/* NOT_USING_BSP
         err_code = bsp_indication_set(BSP_INDICATE_IDLE);
         APP_ERROR_CHECK(err_code);
+NOT_USING_BSP */
     }
     else
     {
@@ -571,8 +571,6 @@ static void dis_init(void)
 // TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS
 // TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS TUDS
 #if USE_TUDS
-//extern void tuds_service_init(void);
-void services_init_tuds_part(void);
 #endif
 
 
@@ -665,7 +663,7 @@ static void services_init(void)
     dfu_init();
 
 #if USE_TUDS
-    services_init_tuds_part();
+    ma_tuds_service_init(&m_ma_tuds, &m_ble_tuds);
 #endif
 
 }
@@ -740,12 +738,17 @@ static void conn_params_init(void)
  */
 static void sleep_mode_enter(void)
 {
-    uint32_t err_code = bsp_indication_set(BSP_INDICATE_IDLE);
+    uint32_t err_code;
+/* NOT_USING_BSP
+    err_code = bsp_indication_set(BSP_INDICATE_IDLE);
     APP_ERROR_CHECK(err_code);
+NOT_USING_BSP */
 
     // Prepare wakeup buttons.
+/* NOT_USING_BSP
     err_code = bsp_btn_ble_sleep_mode_prepare();
     APP_ERROR_CHECK(err_code);
+NOT_USING_BSP */
 
     // Go to system-off mode (this function will not return; wakeup will cause a reset).
     err_code = sd_power_system_off();
@@ -766,6 +769,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 
     switch (ble_adv_evt)
     {
+/* NOT_USING_BSP
         case BLE_ADV_EVT_DIRECTED:
             err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_DIRECTED);
             APP_ERROR_CHECK(err_code);
@@ -786,6 +790,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
             err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_WHITELIST);
             APP_ERROR_CHECK(err_code);
             break;
+NOT_USING_BSP*/            
         case BLE_ADV_EVT_IDLE:
             sleep_mode_enter();
             break;
@@ -862,9 +867,10 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
     switch (p_ble_evt->header.evt_id)
     {
         case BLE_GAP_EVT_CONNECTED:
+/* NOT_USING_BSP
             err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
             APP_ERROR_CHECK(err_code);
-
+NOT_USING_BSP */
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
             break;
 
@@ -880,9 +886,10 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
 
             // disabling alert 3. signal - used for capslock ON
+/* NOT_USING_BSP        
             err_code = bsp_indication_set(BSP_INDICATE_ALERT_OFF);
             APP_ERROR_CHECK(err_code);
-        
+NOT_USING_BSP */        
 
 #if USE_NRF_EXAMPLE
             app_context.len    = sizeof(my_char_t);
@@ -994,11 +1001,14 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 #endif
     
 #if USE_TUDS
-    ble_tuds_on_ble_evt(&m_ble_tuds, p_ble_evt); //karel
+    ble_tuds_on_ble_evt(&m_ble_tuds, p_ble_evt);
+    ma_tuds_on_ble_evt(&m_ma_tuds, p_ble_evt);
 #endif
     
     ble_conn_params_on_ble_evt(p_ble_evt);   //asasasasOK
+/* NOT_USING_BSP
     bsp_btn_ble_on_ble_evt(p_ble_evt); // BSP call HOW DO WE USE IT ???!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+NOT_USING_BSP */
 
 #ifdef BLE_DFU_APP_SUPPORT
     /** @snippet [Propagating BLE Stack events to DFU Service] */
@@ -1547,7 +1557,7 @@ void pinsTUG_25_Invert(void);
 //debug uint32_t DUMB_counterA = 0;
 
 
-
+#if APP_TD_STOPLINE_ENABLED
 // STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
 // STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
 // STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
@@ -1578,6 +1588,7 @@ void stopline_callback(uint32_t value)
 // STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
 // STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
 // STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE STOPLINE
+#endif //APP_TD_STOPLINE_ENABLED
 
 
 int main_tuds(void)
@@ -1590,7 +1601,7 @@ int main_tuds(void)
     //not used - app_trace_init();
     
     dbgPrint_Init();     // karel - debug via spi-master SDO
-#if USE_PRINTF_OVER_SDO
+#if (APP_TD_SPIDGB_ENABLED == 1)
 //while(1){//GJHJHGJHGHJGHJGHJGHJGHJGJHGHJGHJGJHGHJG
     nrf_delay_ms(500);
     dbgPrint("1");
@@ -1661,9 +1672,11 @@ int main_tuds(void)
 	//SAS  err_code = sd_power_mode_set(power_mode);
 #if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     NADC_proc( NADC_action_RESET);
+#else
+    NANNY_normalBoot_schedule_9E_ON_cmd(); // 0x9E, 0x03 "NANNY" -> allow microprocessor to  drive Reset signal
 #endif //APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
-    bln_proc(BLN_PROC_INIT_TRIGGER);
-    blp_proc(BLP_PROC_INIT_TRIGGER);
+    bln_proc(BLN_PROC_INIT_TRIGGER); // 0x9E, 0x00 "Name"
+    blp_proc(BLP_PROC_INIT_TRIGGER); // 0x9E, 0x01 "Parameters"
     
     GP_timer_start( APP_TIMER_TICKS(GP_TIMER_PERIOD_1000MS, APP_TIMER_PRESCALER) );
 

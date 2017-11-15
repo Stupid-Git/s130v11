@@ -30,6 +30,8 @@ typedef void (*ble_tuds_Ucfm_handler_t) (ble_tuds_t * p_tuds, uint8_t * p_data, 
  */
 typedef struct ble_tuds_init_s
 {
+    void*                    parentContext;   // pointer to structure of upper service layer
+
     ble_tuds_Dcmd_handler_t  Dcmd_handler;    // Event handler to be called for handling received DCMD.
     ble_tuds_Ddat_handler_t  Ddat_handler;    // Event handler to be called for handling received DDAT.
     ble_tuds_tx_complete_handler  tx_complete_handler;
@@ -48,6 +50,8 @@ struct ble_tuds_s
     uint16_t                   service_handle;          // Handle of Nordic UART Service (as provided by the S110 SoftDevice).
     uint16_t                   conn_handle;             // Handle of the current connection (as provided by the S110 SoftDevice). BLE_CONN_HANDLE_INVALID if not in a connection.
 
+    void*                      parentContext;           // pointer to structure of upper service layer
+    
     ble_gatts_char_handles_t   Dcmd_handles;            // Handles related to the DCMD characteristic (as provided by the S110 SoftDevice).
     ble_gatts_char_handles_t   Ddat_handles;            // Handles related to the DDAT characteristic (as provided by the S110 SoftDevice).
     ble_gatts_char_handles_t   Dcfm_handles;            // Handles related to the DCFM characteristic (as provided by the S110 SoftDevice).

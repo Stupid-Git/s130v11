@@ -59,11 +59,9 @@ uint32_t ma_holdoff_timer_start(uint32_t timeout_ticks);
 uint32_t ma_holdoff_timer_stop(void);
 
 #if APP_TD_BATT_ENABLED //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#if USE_ADCON_TIMER
 uint32_t battLoad_timer_init(void);
-uint32_t battLoad_timer_start(uint32_t timeout_ticks);
-uint32_t battLoad_timer_stop(void);
-#endif
+//uint32_t battLoad_timer_start(uint32_t timeout_ticks);
+//uint32_t battLoad_timer_stop(void);
 #endif // APP_TD_BATT_ENABLED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 uint32_t GP_timer_init(void);
@@ -71,13 +69,13 @@ uint32_t GP_timer_start(uint32_t timeout_ticks);
 uint32_t GP_timer_stop(void);
 void GP_timer_GBN_enable(uint32_t ticks_until);
 
-uint32_t BlkUp_timer_init(void);
-uint32_t BlkUp_timer_start(uint32_t timeout_ticks);
-uint32_t BlkUp_timer_stop(void);
+//uint32_t BlkUp_timer_init(void);
+//uint32_t BlkUp_timer_start(uint32_t timeout_ticks);
+//uint32_t BlkUp_timer_stop(void);
 
-uint32_t BlkDn_timer_init(void);
-uint32_t BlkDn_timer_start(uint32_t timeout_ticks);
-uint32_t BlkDn_timer_stop(void);
+//uint32_t BlkDn_timer_init(void);
+//uint32_t BlkDn_timer_start(uint32_t timeout_ticks);
+//uint32_t BlkDn_timer_stop(void);
 
 
 enum e_ma_uart_timer_Reason
